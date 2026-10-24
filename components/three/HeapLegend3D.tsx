@@ -15,13 +15,13 @@ export function HeapLegend3D() {
   return (
     <div
       aria-hidden
-      className="absolute top-3 left-3 flex flex-wrap gap-x-3 gap-y-1 font-mono text-[9px] text-muted"
+      className="absolute top-3 left-3 flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-fg-muted"
     >
       {ENTRIES.map(([name, color]) => (
         <span key={name} className="flex items-center gap-1">
           <span
             className="inline-block h-2 w-2 rounded-sm"
-            style={{ background: color, boxShadow: `0 0 6px ${color}` }}
+            style={{ background: color }}
           />
           {name}
         </span>

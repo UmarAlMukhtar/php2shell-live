@@ -51,7 +51,7 @@ export function HeapScene3D({ heap, focusId = null, reducedMotion, selectedId: c
         .map((b) => ({
           id: b.id,
           to: blockPosition(b.id),
-          color: b.state === "corrupted" ? "#f472b6" : "#fb923c",
+          color: b.state === "corrupted" ? "#ee5f55" : "#e0793c",
         })),
     [heap],
   );
@@ -68,19 +68,17 @@ export function HeapScene3D({ heap, focusId = null, reducedMotion, selectedId: c
         gl={{ antialias: true, alpha: true }}
         onPointerMissed={() => onSelect(-1)}
       >
-        <ambientLight intensity={0.35} />
-        <pointLight position={[6, 8, 6]} intensity={70} color="#67e8f9" />
-        <pointLight position={[-7, 5, -4]} intensity={45} color="#a78bfa" />
-        <pointLight position={[0, 2, 6]} intensity={18} color="#f472b6" />
+        <ambientLight intensity={0.5} />
+        <directionalLight position={[5, 9, 4]} intensity={1.1} color="#e6ebf2" />
 
         {/* arena floor grid */}
-        <gridHelper args={[14, 20, "#1c3a55", "#122338"]} position={[0, 0, 0]} />
+        <gridHelper args={[14, 20, "#26303e", "#1e2530"]} position={[0, 0, 0]} />
         <Line
           points={[[-5, 0.02, 2.2], [5, 0.02, 2.2]]}
-          color="#22d3ee"
+          color="#36455a"
           lineWidth={1}
           transparent
-          opacity={0.25}
+          opacity={0.3}
         />
 
         {/* GLOBALS registry — the stale-pointer source */}
@@ -88,14 +86,14 @@ export function HeapScene3D({ heap, focusId = null, reducedMotion, selectedId: c
           <mesh>
             <icosahedronGeometry args={[0.34, 0]} />
             <meshStandardMaterial
-              color={links.length ? "#fb923c" : "#38bdf8"}
-              emissive={links.length ? "#fb923c" : "#38bdf8"}
+              color={links.length ? "#e0793c" : "#647183"}
+              emissive={links.length ? "#e0793c" : "#647183"}
               emissiveIntensity={links.length ? 0.9 : 0.4}
               wireframe
             />
           </mesh>
           <Html center distanceFactor={9} className="pointer-events-none select-none">
-            <div className="font-mono text-[9px] tracking-widest text-cyan/80 whitespace-nowrap">
+            <div className="font-mono text-[11px] tracking-widest text-fg-faint whitespace-nowrap">
               $GLOBALS
             </div>
           </Html>
@@ -129,16 +127,16 @@ export function HeapScene3D({ heap, focusId = null, reducedMotion, selectedId: c
       {/* HTML overlays: legend, inspector, camera reset */}
       <HeapLegend3D />
       {selected && (
-        <div className="glass absolute bottom-3 left-3 max-w-[220px] px-3 py-2 font-mono text-[10px] leading-4">
-          <p className="text-cyan">0x{(selected.id * 0x40).toString(16).padStart(4, "0")}</p>
-          <p className="text-foreground/90">state: {selected.state}</p>
-          {selected.tag && <p className="text-muted">tag: {selected.tag}</p>}
+        <div className="absolute bottom-3 left-3 max-w-[220px] rounded-lg border border-border bg-surface-1 px-3 py-2 font-mono text-[11px] leading-4">
+          <p className="text-accent">0x{(selected.id * 0x40).toString(16).padStart(4, "0")}</p>
+          <p className="text-fg">state: {selected.state}</p>
+          {selected.tag && <p className="text-fg-muted">tag: {selected.tag}</p>}
         </div>
       )}
       <button
         type="button"
         onClick={() => setResetTick((t) => t + 1)}
-        className="glass absolute top-3 right-3 px-2.5 py-1.5 font-mono text-[10px] tracking-widest text-muted uppercase hover:text-cyan focus-visible:outline-2 focus-visible:outline-cyan"
+        className="absolute top-3 right-3 rounded-md border border-border bg-surface-1 px-2.5 py-1.5 text-[11px] font-semibold tracking-widest text-fg-muted uppercase hover:text-accent focus-visible:outline-2 focus-visible:outline-accent"
         aria-label="Reset camera"
       >
         ⟲ view

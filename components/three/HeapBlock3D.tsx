@@ -6,20 +6,20 @@ import type { Mesh } from "three";
 import type { HeapBlockState } from "@/lib/sim/types";
 
 export const STATE_COLOR: Record<HeapBlockState, string> = {
-  free: "#22334a",
-  allocated: "#38bdf8",
-  freed: "#475569",
-  reused: "#fbbf24",
-  stale: "#fb923c",
-  corrupted: "#f472b6",
+  free: "#26303e",
+  allocated: "#5b8def",
+  freed: "#5b6676",
+  reused: "#e2b73c",
+  stale: "#e0793c",
+  corrupted: "#ee5f55",
 };
 
 const STATE_EMISSIVE: Record<HeapBlockState, number> = {
-  free: 0.02,
-  allocated: 0.35,
-  freed: 0.05,
-  reused: 0.4,
-  stale: 0.55,
+  free: 0.05,
+  allocated: 0.4,
+  freed: 0.08,
+  reused: 0.45,
+  stale: 0.6,
   corrupted: 0.9,
 };
 
@@ -44,14 +44,20 @@ export function HeapBlock3D({ id, state, position, selected, onSelect, reducedMo
     const target = selected ? 1.35 : hot ? 1.12 : 1;
     m.scale.setScalar(m.scale.x + (target - m.scale.x) * 0.15);
     if (!reducedMotion && hot) {
-      m.position.y = position[1] + Math.sin(clock.elapsedTime * 3 + id) * 0.06;
+      m.position.y = Math.sin(clock.elapsedTime * 3 + id) * 0.06;
     }
   });
 
   return (
+    <group position={position}>
+      {selected ? (
+        <mesh scale={1.18}>
+          <boxGeometry args={[0.82, 0.82, 0.82]} />
+          <meshBasicMaterial color="#5b8def" wireframe transparent opacity={0.9} />
+        </mesh>
+      ) : null}
     <mesh
       ref={mesh}
-      position={position}
       onClick={(e) => {
         e.stopPropagation();
         onSelect(id);
@@ -68,12 +74,13 @@ export function HeapBlock3D({ id, state, position, selected, onSelect, reducedMo
       <meshStandardMaterial
         color={color}
         emissive={color}
-        emissiveIntensity={STATE_EMISSIVE[state]}
+        emissiveIntensity={selected ? STATE_EMISSIVE[state] + 0.25 : STATE_EMISSIVE[state]}
         transparent
         opacity={state === "free" ? 0.5 : state === "freed" ? 0.55 : 0.95}
-        roughness={0.35}
-        metalness={0.55}
+        roughness={0.6}
+        metalness={0.2}
       />
     </mesh>
+    </group>
   );
 }
