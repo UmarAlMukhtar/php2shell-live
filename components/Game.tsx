@@ -12,6 +12,7 @@ import { VersionBadge } from "./VersionBadge";
 import { VisualizeView } from "./VisualizeView";
 import { ForensicsPanel } from "./forensics/ForensicsPanel";
 import { ForensicsProvider, useForensics } from "./forensics/ForensicsProvider";
+import { IntroGate } from "./IntroGate";
 
 const noopSub = () => () => {};
 
@@ -30,7 +31,9 @@ function phaseIndex(phase: string): number {
 export function Game() {
   return (
     <ForensicsProvider>
-      <GameInner />
+      <IntroGate>
+        <GameInner />
+      </IntroGate>
     </ForensicsProvider>
   );
 }
@@ -145,7 +148,11 @@ function GameInner() {
           <p className="text-[10px] tracking-[0.3em] text-fg-faint uppercase">
             simulated training environment — fictional targets only
           </p>
-          <h1 className="text-xl font-semibold tracking-wide text-fg">
+          <h1
+            id="dashboard-title"
+            tabIndex={-1}
+            className="text-xl font-semibold tracking-wide text-fg"
+          >
             PHP2Shell<span className="text-accent">:</span> Live
             <span className="ml-3 align-middle font-mono text-[11px] font-normal text-fg-faint">
               {CVE.id}

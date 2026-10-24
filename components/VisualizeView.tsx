@@ -11,11 +11,14 @@ import { StageInspector } from "./StageInspector";
 import { StageExplanation } from "./StageExplanation";
 import { PlaybackControls } from "./PlaybackControls";
 import { EvidenceSection } from "./EvidenceSection";
+import { HeapAllocStrip } from "./HeapAllocStrip";
+import { useIntroGate } from "./IntroGate";
 
 const STEP_MS = 3400;
 
 export function VisualizeView() {
   const { state, hydrated, dispatch } = useSim();
+  const { gateOpen } = useIntroGate();
   const [playing, setPlaying] = useState(true);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -33,10 +36,10 @@ export function VisualizeView() {
   // Auto-play driver — functional VISUAL_NEXT so a re-hydrated state can
   // never be overwritten by a stale step index.
   useEffect(() => {
-    if (!hydrated || !playing || atEnd) return;
+    if (!hydrated || !playing || atEnd || gateOpen) return;
     timerRef.current = setTimeout(() => dispatch({ type: "VISUAL_NEXT" }), STEP_MS);
     return clearTimer;
-  }, [hydrated, playing, atEnd, idx, clearTimer, dispatch]);
+  }, [hydrated, playing, atEnd, gateOpen, idx, clearTimer, dispatch]);
 
   const jumpTo = useCallback(
     (index: number) => {
@@ -63,8 +66,8 @@ export function VisualizeView() {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="grid gap-4 lg:grid-cols-[220px_1.3fr_1fr]">
-        <aside className="order-2 min-w-0 lg:order-1">
+      <div className="grid gap-4 lg:grid-cols-12">
+        <aside className="order-2 min-w-0 lg:order-1 lg:col-span-3">
           <div className="rounded-[10px] border border-border bg-surface-1 p-3">
             <StageInspector currentIndex={idx} onJump={jumpTo} />
           </div>
@@ -83,7 +86,10 @@ export function VisualizeView() {
           </div>
         </aside>
 
-        <div className="order-1 flex min-w-0 flex-col gap-4 lg:order-2">
+        <div className="order-1 flex min-w-0 flex-col gap-4 lg:order-2 lg:col-span-6">
+          <div className="rounded-[10px] border border-border bg-surface-1 px-3 py-2">
+            <HeapAllocStrip heap={state.heap} />
+          </div>
           <HeapArena
             heap={state.heap}
             focusId={
@@ -106,7 +112,7 @@ export function VisualizeView() {
           )}
         </div>
 
-        <div className="order-3 flex min-w-0 flex-col gap-4 lg:order-3">
+        <div className="order-3 flex min-w-0 flex-col gap-4 lg:order-3 lg:col-span-3">
           <EvidenceSection title="Simulated terminal" className="min-h-[220px]">
             <Terminal lines={state.term} className="h-full min-h-[220px]" />
           </EvidenceSection>
