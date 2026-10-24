@@ -140,8 +140,8 @@ export function MpView({
           onBackToDefend={() => void onAct({ kind: "reset" })}
         />
       ) : (
-        <div className="grid gap-4 lg:grid-cols-[280px_1.3fr_1fr]">
-          <aside className="flex min-w-0 flex-col gap-4">
+        <div className="grid gap-4 lg:grid-cols-12">
+          <aside className="flex min-w-0 flex-col gap-4 lg:col-span-3">
             <section
               className={`rounded-[10px] border bg-surface-1 p-3 ${
                 role === "attacker"
@@ -216,7 +216,7 @@ export function MpView({
             />
           </aside>
 
-          <div className="flex min-w-0 flex-col gap-4">
+          <div className="flex min-w-0 flex-col gap-4 lg:col-span-6">
             <HeapArena
               heap={state.heap}
               focusId={
@@ -229,7 +229,7 @@ export function MpView({
             </div>
           </div>
 
-          <div className="rounded-[10px] border border-border bg-surface-3">
+          <div className="rounded-[10px] border border-border bg-surface-3 lg:col-span-3">
             <LogStream logs={state.logs} />
           </div>
         </div>

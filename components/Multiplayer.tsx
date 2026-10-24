@@ -251,8 +251,8 @@ export function Multiplayer() {
           </p>
         ) : null}
 
-        <div className="mt-6 grid gap-4 sm:grid-cols-2">
-          <div className="rounded-lg border border-border bg-surface-2 p-4">
+        <div className="mt-6 grid gap-4 sm:grid-cols-12">
+          <div className="rounded-lg border border-border bg-surface-2 p-4 sm:col-span-5">
             <h2 className="text-xs font-bold tracking-widest text-fg uppercase">
               Host a match
             </h2>
@@ -269,7 +269,7 @@ export function Multiplayer() {
               Create room
             </button>
           </div>
-          <div className="rounded-lg border border-border bg-surface-2 p-4">
+          <div className="rounded-lg border border-border bg-surface-2 p-4 sm:col-span-7">
             <h2 className="text-xs font-bold tracking-widest text-fg uppercase">
               Join a match
             </h2>
