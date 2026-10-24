@@ -12,14 +12,14 @@ import type { HeapBlock, SimState, TraceEvent, TraceKind } from "@/lib/sim/types
 type Tab = "inspect" | "trace" | "diff" | "checks";
 
 const KIND_COLOR: Record<TraceKind, string> = {
-  request: "text-info",
-  alloc: "text-cyan",
-  ref_create: "text-warn",
-  cleanup: "text-warn",
-  free: "text-muted",
-  reuse: "text-warn",
-  stale_detected: "text-danger",
-  unsafe_access: "text-danger",
+  request: "text-contained",
+  alloc: "text-accent",
+  ref_create: "text-fg-faint",
+  cleanup: "text-fg-muted",
+  free: "text-fg-muted",
+  reuse: "text-vuln",
+  stale_detected: "text-attack",
+  unsafe_access: "text-breach",
   remediate: "text-ok",
   verify: "text-ok",
 };
@@ -51,7 +51,7 @@ function Inspector({ state }: { state: SimState }) {
 
   if (!block) {
     return (
-      <p className="font-mono text-[11px] text-muted">
+      <p className="font-mono text-[11px] text-fg-muted">
         Click a heap block in the arena (or an event below) to inspect its
         allocation record — address, generation, owner, lifetime, references.
       </p>
@@ -78,14 +78,14 @@ function Inspector({ state }: { state: SimState }) {
       </dl>
       <div className="space-y-2">
         <div>
-          <h4 className="font-mono text-[10px] tracking-widest text-muted uppercase">References in</h4>
+          <h4 className="font-mono text-[11px] tracking-widest text-fg-faint uppercase">References in</h4>
           {inbound.length === 0 ? (
-            <p className="font-mono text-[11px] text-muted">none</p>
+            <p className="font-mono text-[11px] text-fg-muted">none</p>
           ) : (
             inbound.map((r) => (
               <p key={r.id} className="font-mono text-[11px] leading-5">
-                <span className="text-foreground/90">{r.source} → blk#{r.targetId}</span>
-                <span className={refIsStale(r, block) ? " text-danger" : " text-ok"}>
+                <span className="text-fg">{r.source} → blk#{r.targetId}</span>
+                <span className={refIsStale(r, block) ? " text-breach" : " text-ok"}>
                   {" "}· {refIsStale(r, block) ? staleReason(r, block) : `valid (gen${r.generation})`}
                 </span>
               </p>
@@ -93,28 +93,28 @@ function Inspector({ state }: { state: SimState }) {
           )}
         </div>
         <div>
-          <h4 className="font-mono text-[10px] tracking-widest text-muted uppercase">Lifetime</h4>
+          <h4 className="font-mono text-[11px] tracking-widest text-fg-faint uppercase">Lifetime</h4>
           {block.history.length === 0 ? (
-            <p className="font-mono text-[11px] text-muted">no transitions recorded</p>
+            <p className="font-mono text-[11px] text-fg-muted">no transitions recorded</p>
           ) : (
-            <p className="font-mono text-[11px] text-foreground/80">
+            <p className="font-mono text-[11px] text-fg-muted">
               {block.history.map((h) => h.to).join(" → ")}
             </p>
           )}
         </div>
       </div>
       <div className="md:col-span-2">
-        <h4 className="font-mono text-[10px] tracking-widest text-muted uppercase">Related events</h4>
+        <h4 className="font-mono text-[11px] tracking-widest text-fg-faint uppercase">Related events</h4>
         <ul className="max-h-28 overflow-y-auto">
           {events.map((e) => (
-            <li key={e.id} className="font-mono text-[10px] leading-4">
-              <span className="text-muted">e{e.ts}</span>{" "}
+            <li key={e.id} className="font-mono text-[11px] leading-5">
+              <span className="text-fg-faint">e{e.ts}</span>{" "}
               <span className={KIND_COLOR[e.kind]}>{e.kind}</span>{" "}
-              <span className="text-foreground/80">{e.detail}</span>
+              <span className="text-fg-muted">{e.detail}</span>
             </li>
           ))}
           {events.length === 0 && (
-            <li className="font-mono text-[10px] text-muted">no events yet</li>
+            <li className="font-mono text-[11px] text-fg-muted">no events yet</li>
           )}
         </ul>
       </div>
@@ -125,8 +125,8 @@ function Inspector({ state }: { state: SimState }) {
 function Row({ k, v, accent, warn }: { k: string; v: string; accent?: boolean; warn?: boolean }) {
   return (
     <div className="flex justify-between gap-4">
-      <dt className="text-muted">{k}</dt>
-      <dd className={warn ? "text-danger" : accent ? "text-cyan" : "text-foreground/90"}>{v}</dd>
+      <dt className="text-fg-faint">{k}</dt>
+      <dd className={warn ? "text-breach" : accent ? "text-accent" : "text-fg"}>{v}</dd>
     </div>
   );
 }
@@ -136,7 +136,7 @@ function TraceList({ state }: { state: SimState }) {
   return (
     <ul className="max-h-56 overflow-y-auto pr-1" aria-label="Execution trace">
       {state.trace.length === 0 && (
-        <li className="font-mono text-[11px] text-muted">
+        <li className="font-mono text-[11px] text-fg-muted">
           No events yet — play the visualize timeline (or defend) to populate the trace.
         </li>
       )}
@@ -148,12 +148,12 @@ function TraceList({ state }: { state: SimState }) {
             <button
               type="button"
               onClick={() => fx?.select(target)}
-              className="block w-full text-left font-mono text-[10px] leading-5 hover:bg-cyan/5 focus-visible:outline-1 focus-visible:outline-cyan"
+              className="block w-full rounded px-1 text-left font-mono text-[11px] leading-5 hover:bg-accent/5 focus-visible:outline-2 focus-visible:outline-accent"
             >
-              <span className="text-muted">e{e.ts}</span>{" "}
+              <span className="text-fg-faint">e{e.ts}</span>{" "}
               <span className={KIND_COLOR[e.kind]}>{e.kind}</span>{" "}
-              <span className="text-info/80">{e.subject}</span>{" "}
-              <span className="text-foreground/80">{e.detail}</span>
+              <span className="text-contained">{e.subject}</span>{" "}
+              <span className="text-fg-muted">{e.detail}</span>
             </button>
           </li>
         );
@@ -170,7 +170,7 @@ function DiffReplay() {
 
   return (
     <div className="space-y-3">
-      <p className="font-mono text-[10px] leading-4 text-muted">
+      <p className="text-[11px] leading-4 text-fg-muted">
         Model-level comparison — the same scripted event stream replayed through
         the engine under two runtime configs. Not an execution of real PHP
         binaries and not a claim of real-world exploitability.
@@ -182,32 +182,32 @@ function DiffReplay() {
             type="button"
             onClick={() => setFrame(i)}
             aria-current={i === frame ? "step" : undefined}
-            className={`glass shrink-0 px-2 py-1 font-mono text-[9px] tracking-wider uppercase ${
-              i === frame ? "border-cyan text-cyan" : "text-muted"
-            } ${i === diff.divergence ? "outline outline-1 outline-warn" : ""}`}
+            className={`shrink-0 rounded-md border border-border bg-surface-2 px-2 py-1 font-mono text-[11px] tracking-wider uppercase ${
+              i === frame ? "border-accent text-accent" : "text-fg-muted"
+            } ${i === diff.divergence ? "outline outline-1 outline-vuln" : ""}`}
           >
             {i}
           </button>
         ))}
       </div>
       {diff.divergence >= 0 && (
-        <p className="font-mono text-[10px] leading-4 text-warn">
+        <p className="font-mono text-[11px] leading-4 text-vuln">
           first divergence @ step {diff.divergence} (“{diff.a.frames[diff.divergence]!.title}”): {diff.divergenceNote}
         </p>
       )}
       <div className="grid gap-3 md:grid-cols-2">
         {[{ f: fa, run: diff.a }, { f: fb, run: diff.b }].map(({ f, run }) => (
-          <div key={run.label} className="glass min-w-0 p-2">
-            <p className="mb-1 font-mono text-[10px] tracking-wider">
-              <span className={run.patched ? "text-ok" : "text-danger"}>{run.label}</span>
-              <span className="text-muted"> · {f.title} · {f.status}</span>
+          <div key={run.label} className="min-w-0 rounded-lg border border-border bg-surface-2 p-2">
+            <p className="mb-1 font-mono text-[11px] tracking-wider">
+              <span className={run.patched ? "text-ok" : "text-breach"}>{run.label}</span>
+              <span className="text-fg-faint"> · {f.title} · {f.status}</span>
             </p>
             <HeapVisualizer heap={f.heap} />
             <ul className="mt-1 max-h-24 overflow-y-auto">
               {f.events.map((e) => (
-                <li key={e.id} className="font-mono text-[9px] leading-4">
+                <li key={e.id} className="font-mono text-[11px] leading-4">
                   <span className={KIND_COLOR[e.kind]}>{e.kind}</span>{" "}
-                  <span className="text-foreground/70">{e.detail}</span>
+                  <span className="text-fg-muted">{e.detail}</span>
                 </li>
               ))}
             </ul>
@@ -234,29 +234,29 @@ function Checks({ state }: { state: SimState }) {
   return (
     <div className="grid gap-3 md:grid-cols-2">
       <div>
-        <h4 className="mb-1 font-mono text-[10px] tracking-widest text-cyan uppercase">Live model invariants</h4>
+        <h4 className="mb-1 text-[11px] font-semibold tracking-widest text-accent uppercase">Live model invariants</h4>
         {checks.map((c) => (
-          <p key={c.id} className="font-mono text-[10px] leading-4">
-            <span className={c.ok ? "text-ok" : "text-danger"}>{c.ok ? "✓" : "✗"}</span>{" "}
-            <span className="text-foreground/90">{c.name}</span>
-            <span className="text-muted"> — {c.detail}</span>
+          <p key={c.id} className="text-[11px] leading-4">
+            <span className={c.ok ? "text-ok" : "text-breach"}>{c.ok ? "✓" : "✗"}</span>{" "}
+            <span className="text-fg">{c.name}</span>
+            <span className="text-fg-muted"> — {c.detail}</span>
           </p>
         ))}
       </div>
       <div>
-        <h4 className="mb-1 font-mono text-[10px] tracking-widest text-cyan uppercase">Verified properties (Vitest)</h4>
+        <h4 className="mb-1 text-[11px] font-semibold tracking-widest text-accent uppercase">Verified properties (Vitest)</h4>
         {STATIC.map((s) => (
-          <p key={s.name} className="font-mono text-[10px] leading-4">
+          <p key={s.name} className="text-[11px] leading-4">
             <span className="text-ok">✓</span>{" "}
-            <span className="text-foreground/90">{s.name}</span>
-            <span className="text-muted"> — {s.detail}</span>
+            <span className="text-fg">{s.name}</span>
+            <span className="text-fg-muted"> — {s.detail}</span>
           </p>
         ))}
       </div>
       <div className="md:col-span-2">
-        <h4 className="mb-1 font-mono text-[10px] tracking-widest text-warn uppercase">Assumptions & simplifications</h4>
+        <h4 className="mb-1 text-[11px] font-semibold tracking-widest text-vuln uppercase">Assumptions & simplifications</h4>
         {ASSUMPTIONS.map((a) => (
-          <p key={a} className="font-mono text-[10px] leading-4 text-muted">△ {a}</p>
+          <p key={a} className="text-[11px] leading-4 text-fg-muted">△ {a}</p>
         ))}
       </div>
     </div>
@@ -297,14 +297,20 @@ export function ForensicsPanel() {
     : "";
 
   return (
-    <section aria-label="Forensics console" id="forensics-panel" className="glass mt-4 p-3">
+    <section
+      aria-label="Forensics console"
+      id="forensics-panel"
+      className="mt-4 rounded-[10px] border border-contained/40 bg-surface-1 p-3"
+    >
       <p className="sr-only" aria-live="polite">{announcement}</p>
       <div
-        className="sticky top-2 z-10 -mx-3 mb-3 flex flex-wrap items-center gap-2 bg-panel/95 px-3 py-1 backdrop-blur"
+        className="sticky top-0 z-10 -mx-3 mb-3 flex flex-wrap items-center gap-2 border-b border-border bg-surface-1 px-3 py-1.5"
         role="tablist"
         aria-label="Forensics tools"
       >
-        <span className="holo-title mr-2 font-mono text-[11px] tracking-[0.25em] uppercase">forensics</span>
+        <span className="mr-2 text-[11px] font-bold tracking-[0.25em] text-contained uppercase">
+          forensics
+        </span>
         {TABS.map((t, i) => (
           <button
             key={t.id}
@@ -319,10 +325,10 @@ export function ForensicsPanel() {
             }}
             onClick={() => setTab(t.id)}
             onKeyDown={(e) => onTabKeyDown(e, i)}
-            className={`px-2.5 py-1 font-mono text-[10px] tracking-widest uppercase rounded-sm border transition-colors ${
+            className={`rounded-md border px-2.5 py-1 text-[11px] font-semibold tracking-widest uppercase transition-colors focus-visible:outline-2 focus-visible:outline-accent ${
               tab === t.id
-                ? "border-cyan/60 bg-cyan/10 text-cyan"
-                : "border-border text-muted hover:text-foreground"
+                ? "border-accent/60 bg-accent/10 text-accent"
+                : "border-border text-fg-muted hover:text-fg"
             }`}
           >
             {t.label}
