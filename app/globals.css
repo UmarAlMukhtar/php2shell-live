@@ -1,133 +1,84 @@
 @import "tailwindcss";
 
 :root {
-  /* Command-center palette */
-  --background: #04070d;
-  --foreground: #d7e6ee;
-  --panel: #0a1220;
-  --panel-2: #0d1830;
-  --border: #1c3050;
-  --accent: #34d399;
-  --accent-dim: #10b981;
-  --danger: #f87171;
-  --warn: #fbbf24;
-  --info: #60a5fa;
-  --muted: #6b7f96;
-  /* Holographic additions */
-  --cyan: #22d3ee;
-  --purple: #a78bfa;
-  --magenta: #f472b6;
-  --glass-bg: rgb(13 24 48 / 0.55);
-  --glass-border: rgb(96 165 250 / 0.22);
-  --glass-glow: rgb(34 211 238 / 0.12);
+  /* Operations-dashboard palette — deep graphite layered surfaces. */
+  --bg: #0b0e13;
+  --surface-1: #12161d;
+  --surface-2: #171c25;
+  --surface-3: #1e2530;
+  --border: #26303e;
+  --border-strong: #36455a;
+  --fg: #e6ebf2;
+  --fg-muted: #9aa7b8;
+  --fg-faint: #8b99ac;
+  --accent: #5b8def;
+  --accent-fg: #0b0e13;
+  /* Semantic status colors */
+  --vuln: #e2b73c;
+  --attack: #e0793c;
+  --breach: #ee5f55;
+  --contained: #5b8def;
+  --ok: #4cb782;
+  --muted-state: #5b6676;
+  --radius-panel: 10px;
+  --radius-inner: 8px;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-panel: var(--panel);
-  --color-panel-2: var(--panel-2);
+  --color-bg: var(--bg);
+  --color-surface-1: var(--surface-1);
+  --color-surface-2: var(--surface-2);
+  --color-surface-3: var(--surface-3);
   --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-fg: var(--fg);
+  --color-fg-muted: var(--fg-muted);
+  --color-fg-faint: var(--fg-faint);
   --color-accent: var(--accent);
-  --color-accent-dim: var(--accent-dim);
-  --color-danger: var(--danger);
-  --color-warn: var(--warn);
-  --color-info: var(--info);
-  --color-muted: var(--muted);
-  --color-cyan: var(--cyan);
-  --color-purple: var(--purple);
-  --color-magenta: var(--magenta);
-  --font-mono: ui-monospace, "SF Mono", "Cascadia Mono", Menlo, Consolas, monospace;
+  --color-accent-fg: var(--accent-fg);
+  --color-vuln: var(--vuln);
+  --color-attack: var(--attack);
+  --color-breach: var(--breach);
+  --color-contained: var(--contained);
+  --color-ok: var(--ok);
+  --color-muted-state: var(--muted-state);
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", "Cascadia Mono", Menlo, Consolas,
+    monospace;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-sans);
   /* Never let a fixed-width child (xterm rows) scroll the whole page. */
   overflow-x: clip;
 }
 
-/* Ambient cyber-lab backdrop: vignette glow + scanline texture. */
-.cyber-bg {
-  background:
-    radial-gradient(1200px 600px at 50% -10%, rgb(34 211 238 / 0.07), transparent 60%),
-    radial-gradient(900px 500px at 85% 110%, rgb(167 139 250 / 0.06), transparent 60%),
-    radial-gradient(700px 400px at 10% 100%, rgb(244 114 182 / 0.04), transparent 60%),
-    var(--background);
-}
-
-/* Subtle CRT scanline texture for the dashboard backdrop. */
-.scanlines {
-  background-image: repeating-linear-gradient(
-    to bottom,
-    transparent 0px,
-    transparent 2px,
-    rgb(255 255 255 / 0.015) 3px,
-    transparent 4px
-  );
-}
-
-/* Holographic glass panel — translucent, blurred, glowing edge. */
+/* Panel classes — opaque graphite surfaces, hairline borders, no glow. */
 .glass {
-  background: var(--glass-bg);
-  border: 1px solid var(--glass-border);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  box-shadow:
-    0 0 0 1px rgb(34 211 238 / 0.04) inset,
-    0 8px 32px rgb(0 0 0 / 0.45),
-    0 0 24px var(--glass-glow);
-  border-radius: 0.65rem;
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-panel);
 }
 
 .glass-danger {
-  border-color: rgb(248 113 113 / 0.3);
-  box-shadow:
-    0 0 0 1px rgb(248 113 113 / 0.06) inset,
-    0 8px 32px rgb(0 0 0 / 0.45),
-    0 0 24px rgb(248 113 113 / 0.1);
+  border-color: rgb(238 95 85 / 0.5);
 }
 
 .glass-accent {
-  border-color: rgb(52 211 153 / 0.3);
-  box-shadow:
-    0 0 0 1px rgb(52 211 153 / 0.06) inset,
-    0 8px 32px rgb(0 0 0 / 0.45),
-    0 0 24px rgb(52 211 153 / 0.1);
+  border-color: rgb(91 141 239 / 0.5);
 }
 
-/* Pulsing glow for live/urgent indicators. */
-@keyframes pulse-glow {
-  0%, 100% { opacity: 1; filter: drop-shadow(0 0 4px currentColor); }
-  50% { opacity: 0.55; filter: drop-shadow(0 0 1px currentColor); }
-}
-.pulse-glow { animation: pulse-glow 2s ease-in-out infinite; }
-
-/* Slow hologram shimmer on panel headers. */
-@keyframes holo-drift {
-  0%, 100% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-}
-.holo-title {
-  background: linear-gradient(90deg, var(--cyan), var(--purple), var(--cyan));
-  background-size: 200% auto;
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  animation: holo-drift 8s ease-in-out infinite;
+/* Shared focus ring — one restrained accent. */
+.focus-ring {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 
-/* xterm inherits our palette */
+/* xterm inherits the surface-3 inset well */
 .xterm {
   padding: 0.75rem;
   height: 100%;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .scanlines,
-  .holo-title,
-  .pulse-glow {
-    animation: none;
-    background-image: none;
-  }
 }
