@@ -118,9 +118,9 @@ CI (`.github/workflows/ci.yml`) runs the same gates on every push and PR.
   token (no accounts).
 - **Persistence** — room state is ephemeral (Redis key TTL); nothing is
   logged to a durable database.
-- **Known issue** — the `/` dashboard header overflows on ~390px viewports
-  (`scrollWidth` 420 vs client 390; the header row's title + chips don't
-  wrap). `/play` is clean at the same width.
+- **Responsive** — verified no horizontal overflow at 390×844, 768×1024,
+  and 1440×900 on both `/` and `/play` (the 390px dashboard-header wrap
+  regression was fixed in this branch).
 
 ## Docs
 

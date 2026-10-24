@@ -92,7 +92,7 @@ function ForensicsToggle() {
       {showHint ? (
         <span
           role="status"
-          className="absolute top-full right-0 z-20 mt-2 flex w-56 items-start gap-2 rounded-lg border border-border bg-surface-2 p-2 text-[11px] leading-4 normal-case tracking-normal text-fg"
+          className="absolute top-full left-0 z-20 mt-2 flex w-56 items-start gap-2 rounded-lg border border-border bg-surface-2 p-2 text-[11px] leading-4 normal-case tracking-normal text-fg sm:right-0 sm:left-auto"
         >
           <span className="flex-1">
             New: <strong>FORENSICS</strong> — inspect every allocation, replay the
@@ -177,7 +177,7 @@ function GameInner() {
             </span>
           </h1>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
           <ForensicsToggle />
           <Link
             href="/play"
