@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { applyRoomAction, snapshot } from "@/lib/mp/rooms";
+import { applyRoomAction, isValidRoomAction, snapshot } from "@/lib/mp/rooms";
 import { getRoomStore } from "@/lib/mp/store";
 import type { RoomAction } from "@/lib/mp/protocol";
 
@@ -16,8 +16,11 @@ export async function POST(
     token?: string;
     action?: RoomAction;
   };
-  if (!body.playerId || !body.token || !body.action) {
-    return NextResponse.json({ error: "bad_request" }, { status: 400 });
+  if (!body.playerId || !body.token || !isValidRoomAction(body.action)) {
+    return NextResponse.json(
+      { error: "bad_request" },
+      { status: 400, headers: { "Cache-Control": "no-store" } },
+    );
   }
   const store = getRoomStore();
   const res = await applyRoomAction(
@@ -28,8 +31,14 @@ export async function POST(
     body.action,
   );
   if (!res.ok) {
-    return NextResponse.json({ seq: res.seq, error: res.error }, { status: 400 });
+    return NextResponse.json(
+      { seq: res.seq, error: res.error },
+      { status: 400, headers: { "Cache-Control": "no-store" } },
+    );
   }
   const room = await store.get(code.toUpperCase());
-  return NextResponse.json({ seq: res.seq, room: room ? snapshot(room) : null });
+  return NextResponse.json(
+    { seq: res.seq, room: room ? snapshot(room) : null },
+    { headers: { "Cache-Control": "no-store" } },
+  );
 }

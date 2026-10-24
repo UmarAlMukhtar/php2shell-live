@@ -1,6 +1,6 @@
 import type { Room } from "./protocol";
 
-export const ROOM_TTL_MS = 30 * 60 * 1000;
+export const ROOM_TTL_MS = 60 * 60 * 1000;
 
 /**
  * Room persistence. Two backends:

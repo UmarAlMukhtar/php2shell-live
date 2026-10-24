@@ -3,7 +3,9 @@ import { getAction } from "@/lib/sim/defense";
 import { enterStageInternal, initialState, pushLogs } from "@/lib/sim/engine";
 import { log } from "@/lib/sim/logs";
 import { runVerification } from "@/lib/sim/verify";
-import type { SimState } from "@/lib/sim/types";
+import type { AttackerActionId, DefenderActionId, SimState } from "@/lib/sim/types";
+import { ATTACKER_ACTIONS } from "@/lib/sim/attack";
+import { DEFENDER_ACTIONS } from "@/lib/sim/defense";
 import type {
   ActionResult,
   Player,
@@ -17,6 +19,21 @@ import type { RoomStore } from "./store";
 const CODE_ALPHABET = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
 const CODE_LEN = 4;
 const MAX_PLAYERS = 8;
+const STALE_PLAYER_MS = 120_000;
+const ACTION_FLOOR_MS = 150;
+
+const DEFEND_IDS = new Set(DEFENDER_ACTIONS.map((d) => d.id));
+const ATTACK_IDS = new Set(ATTACKER_ACTIONS.map((d) => d.id));
+
+/** Whitelist-validate incoming action payloads before touching state. */
+export function isValidRoomAction(a: unknown): a is RoomAction {
+  if (!a || typeof a !== "object") return false;
+  const k = (a as { kind?: string }).kind;
+  const id = (a as { id?: string }).id;
+  if (k === "defend") return !!id && DEFEND_IDS.has(id as DefenderActionId);
+  if (k === "attack") return !!id && ATTACK_IDS.has(id as AttackerActionId);
+  return k === "verify" || k === "reset";
+}
 
 function makeCode(len = CODE_LEN): string {
   const bytes = crypto.getRandomValues(new Uint8Array(len));
@@ -91,15 +108,20 @@ export async function joinRoom(
     return { error: "invalid_session" };
   }
 
+  // Prune ghost records so a few abandoned joins can't wedge the room.
+  const cutoff = Date.now() - STALE_PLAYER_MS;
+  room.players = room.players.filter((p: Player) => p.lastSeen > cutoff);
   if (room.players.length >= MAX_PLAYERS) return { error: "room_full" };
 
   const player: Player = {
     id: makeToken(),
     token: makeToken(),
     role: pickRole(room, role),
-    name: name?.slice(0, 24) || "anon",
+    // Strip control chars — name is rendered into other clients' UIs.
+    name: (name?.replace(/[\u0000-\u001F\u007F]/g, "").slice(0, 24) || "anon"),
     joinedAt: Date.now(),
     lastSeen: Date.now(),
+    lastActionAt: 0,
     connected: true,
   };
   const next = { ...room, players: [...room.players, player], seq: room.seq + 1, updatedAt: Date.now() };
@@ -173,6 +195,13 @@ export async function applyRoomAction(
     if (!player || player.token !== token) {
       return { ok: false, seq: room.seq, error: "unauthorized" };
     }
+    if (!isValidRoomAction(action)) {
+      return { ok: false, seq: room.seq, error: "unknown_action" };
+    }
+    // Per-player floor: blocks scripted floods, invisible to humans.
+    if (Date.now() - player.lastActionAt < ACTION_FLOOR_MS) {
+      return { ok: false, seq: room.seq, error: "too_fast" };
+    }
     const gate = roleGate(action, player.role);
     if (gate) return { ok: false, seq: room.seq, error: gate };
 
@@ -204,6 +233,7 @@ export async function applyRoomAction(
     }
     if (error) return { ok: false, seq: room.seq, error };
 
+    player.lastActionAt = Date.now();
     const next: Room = { ...room, sim, seq: room.seq + 1, updatedAt: Date.now() };
     if (await store.cas(code, room.seq, next)) {
       return { ok: true, seq: next.seq };

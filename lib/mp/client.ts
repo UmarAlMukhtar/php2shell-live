@@ -61,6 +61,7 @@ export class MpClient {
   private closed = false;
   private conn: ConnState = "connecting";
   private lastRoom: RoomSnapshot | null = null;
+  private lastTouchAt = 0;
   seq = -1;
 
   constructor(
@@ -185,8 +186,13 @@ export class MpClient {
     const tick = async () => {
       if (this.closed) return;
       try {
+        // Presence heartbeat rides along, but only every ~5s — each touch
+        // is a store write, so piggyback on the poll sparingly.
+        const touch = Date.now() - this.lastTouchAt > 5000;
+        if (touch) this.lastTouchAt = Date.now();
         const res = await fetch(
-          `/api/room/${this.id.code}/state?seq=${this.seq}&pid=${this.id.playerId}`,
+          `/api/room/${this.id.code}/state?seq=${this.seq}` +
+            (touch ? `&pid=${this.id.playerId}` : ""),
         );
         if (res.ok) {
           const data = (await res.json()) as {

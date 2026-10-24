@@ -186,6 +186,18 @@ export function Multiplayer() {
           One player drives the exploit. The other runs incident response — same
           simulation, live. Share the room code or QR.
         </p>
+        <div className="mt-4 grid gap-2 sm:grid-cols-2">
+          <p className="rounded border border-danger/30 bg-danger/5 px-3 py-2 font-mono text-[10px] leading-4 text-foreground/80">
+            <span className="font-bold text-danger">ATTACKER</span> — run the
+            exploit chain: recon → probe → fatal error → heap groom → UAF →
+            seize the worker. BREACH wins.
+          </p>
+          <p className="rounded border border-accent/30 bg-accent/5 px-3 py-2 font-mono text-[10px] leading-4 text-foreground/80">
+            <span className="font-bold text-accent">DEFENDER</span> — inspect,
+            block or slow the attack, apply the right patch, restart, verify.
+            PATCHED wins.
+          </p>
+        </div>
 
         <div className="mt-5 grid gap-4 sm:grid-cols-2">
           <label className="flex flex-col gap-1.5">

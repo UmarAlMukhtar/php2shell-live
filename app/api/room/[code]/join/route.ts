@@ -26,12 +26,18 @@ export async function POST(
     body.token,
   );
   if ("error" in res) {
-    return NextResponse.json({ error: res.error }, { status: 400 });
+    return NextResponse.json(
+      { error: res.error },
+      { status: 400, headers: { "Cache-Control": "no-store" } },
+    );
   }
-  return NextResponse.json({
-    playerId: res.player.id,
-    token: res.player.token,
-    role: res.player.role,
-    room: snapshot(res.room),
-  });
+  return NextResponse.json(
+    {
+      playerId: res.player.id,
+      token: res.player.token,
+      role: res.player.role,
+      room: snapshot(res.room),
+    },
+    { headers: { "Cache-Control": "no-store" } },
+  );
 }

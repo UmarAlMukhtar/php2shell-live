@@ -15,14 +15,22 @@ export async function GET(
   const store = getRoomStore();
   if (pid) void store.touch(code.toUpperCase(), pid).catch(() => {});
   const room = await store.get(code.toUpperCase());
-  if (!room) return NextResponse.json({ error: "room_not_found" }, { status: 404 });
+  const NO_STORE = { "Cache-Control": "no-store" };
+  if (!room) {
+    return NextResponse.json(
+      { error: "room_not_found" },
+      { status: 404, headers: NO_STORE },
+    );
+  }
   if (room.seq <= since) {
     // Still surface presence changes (heartbeat-derived) between seq bumps.
-    return NextResponse.json({
-      seq: room.seq,
-      unchanged: true,
-      players: snapshot(room).players,
-    });
+    return NextResponse.json(
+      { seq: room.seq, unchanged: true, players: snapshot(room).players },
+      { headers: NO_STORE },
+    );
   }
-  return NextResponse.json({ seq: room.seq, room: snapshot(room) });
+  return NextResponse.json(
+    { seq: room.seq, room: snapshot(room) },
+    { headers: NO_STORE },
+  );
 }

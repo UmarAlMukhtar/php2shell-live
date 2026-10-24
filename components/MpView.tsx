@@ -167,6 +167,14 @@ export function MpView({
               <>
                 <button
                   type="button"
+                  onClick={() => void onAct({ kind: "reset" })}
+                  className="rounded border border-border bg-panel-2 px-3 py-2 font-mono text-[10px] tracking-widest text-muted uppercase hover:border-foreground/40 hover:text-foreground"
+                  data-testid="mp-reset"
+                >
+                  ⟲ reset incident
+                </button>
+                <button
+                  type="button"
                   onClick={() => void onAct({ kind: "verify" })}
                   className={`rounded border px-4 py-3 font-mono text-sm font-bold tracking-widest transition-colors focus-visible:outline-2 ${
                     patchLive
@@ -185,8 +193,8 @@ export function MpView({
               </>
             ) : (
               <p className="font-mono text-[10px] leading-4 text-muted">
-                The defender sees your moves land in real time — same simulation,
-                other side. Blocked? Rotate source. Worker pulled? Wait it out.
+                Goal: reach BREACH before they patch. Blocked? Rotate source.
+                Patch live? You're deflected — the defender wins on verify.
               </p>
             )}
             <VersionBadge

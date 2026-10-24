@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it } from "vitest";
 import {
   applyRoomAction,
   createRoom,
+  isValidRoomAction,
   joinRoom,
   snapshot,
 } from "@/lib/mp/rooms";
@@ -186,5 +187,66 @@ describe("rooms", () => {
     setRoomStore(null);
     delete process.env.UPSTASH_REDIS_REST_URL;
     expect(getRoomStore().constructor.name).toBe("MemoryRoomStore");
+  });
+
+  it("rejects malformed action payloads without touching state", async () => {
+    const room = await createRoom(store);
+    const { def } = await joinTwo(room.code);
+    for (const bad of [
+      { kind: "defend", id: "nope" },
+      { kind: "attack", id: "rm -rf /" },
+      { kind: "hack" },
+      { kind: "defend" },
+      "string",
+      null,
+    ] as unknown[]) {
+      expect(isValidRoomAction(bad)).toBe(false);
+      const r = await applyRoomAction(store, room.code, def.id, def.token, bad as never);
+      expect(r.ok).toBe(false);
+      expect(r.error).toBe("unknown_action");
+    }
+    expect(isValidRoomAction({ kind: "defend", id: "inspect_logs" })).toBe(true);
+    expect(isValidRoomAction({ kind: "verify" })).toBe(true);
+  });
+
+  it("throttles action floods per player", async () => {
+    const room = await createRoom(store);
+    const { def } = await joinTwo(room.code);
+    const r1 = await applyRoomAction(store, room.code, def.id, def.token, {
+      kind: "defend",
+      id: "inspect_logs",
+    });
+    expect(r1.ok).toBe(true);
+    // Immediate second action hits the floor even though it's a different action.
+    const r2 = await applyRoomAction(store, room.code, def.id, def.token, {
+      kind: "defend",
+      id: "investigate_version",
+    });
+    expect(r2.ok).toBe(false);
+    expect(r2.error).toBe("too_fast");
+  });
+
+  it("prunes ghost players so a room can't wedge full", async () => {
+    const room = await createRoom(store);
+    // Fill the room with 8 joins.
+    for (let i = 0; i < 8; i++) {
+      const j = await joinRoom(store, room.code, `p${i}`, "spectator");
+      expect("error" in j).toBe(false);
+    }
+    const full = await joinRoom(store, room.code, "late", "spectator");
+    expect("error" in full && full.error).toBe("room_full");
+    // Age every player past the stale window.
+    const stored = await store.get(room.code);
+    for (const p of stored!.players) p.lastSeen = Date.now() - 130_000;
+    await store.cas(room.code, stored!.seq, stored!);
+    const again = await joinRoom(store, room.code, "late", "spectator");
+    expect("error" in again).toBe(false);
+  });
+
+  it("sanitizes control characters from call signs", async () => {
+    const room = await createRoom(store);
+    const j = await joinRoom(store, room.code, "a\u0000b\nlong-call-sign-xxxxxxxx", "spectator");
+    if ("error" in j) throw new Error("join failed");
+    expect(j.player.name).toBe("ablong-call-sign-xxxxx");
   });
 });

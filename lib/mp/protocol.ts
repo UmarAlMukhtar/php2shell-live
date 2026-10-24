@@ -14,6 +14,8 @@ export interface Player {
   name: string;
   joinedAt: number;
   lastSeen: number;
+  /** Server-side action floor — throttles scripted floods. */
+  lastActionAt: number;
   connected: boolean;
 }
 
@@ -27,7 +29,7 @@ export interface Room {
   sim: SimState;
 }
 
-/** Player shape safe to send to clients (no tokens). */
+/** Player shape safe to send to clients (no tokens, no internals). */
 export interface PublicPlayer {
   id: string;
   role: Role;

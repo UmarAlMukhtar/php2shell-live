@@ -8,6 +8,9 @@ import { markConnected } from "@/lib/mp/rooms";
 import type { ClientMsg } from "@/lib/mp/protocol";
 
 export const dynamic = "force-dynamic";
+// Sockets live as long as the function does — keep the connection alive
+// for the longest duration the plan allows instead of the 60s default.
+export const maxDuration = 300;
 
 /** GET /api/room/[code]/ws — native WebSocket upgrade (Vercel Functions). */
 export async function GET(
