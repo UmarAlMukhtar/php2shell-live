@@ -28,16 +28,17 @@ export function Game() {
   const breaching = state.status === "BREACHED" && state.phase !== "report";
 
   return (
-    <div className="scanlines mx-auto flex min-h-screen max-w-[1400px] flex-col gap-4 p-4 font-mono md:p-6">
+    <div className="cyber-bg scanlines mx-auto flex min-h-screen max-w-[1400px] flex-col gap-4 p-4 font-mono md:p-6">
       <BreachEffect active={breaching} />
 
-      <header className="flex flex-wrap items-center justify-between gap-3 border-b border-border pb-3">
+      <header className="flex flex-wrap items-center justify-between gap-3 border-b border-cyan/20 pb-3">
         <div>
           <p className="text-[10px] tracking-[0.3em] text-muted uppercase">
             simulated training environment — fictional targets only
           </p>
           <h1 className="text-xl font-bold tracking-wider text-foreground">
-            PHP2Shell<span className="text-danger">:</span> Live
+            <span className="holo-title">PHP2Shell</span>
+            <span className="text-danger">:</span> Live
             <span className="ml-3 align-middle font-mono text-[10px] font-normal text-muted">
               {CVE.id}
             </span>

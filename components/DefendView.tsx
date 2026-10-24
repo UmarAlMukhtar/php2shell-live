@@ -3,7 +3,7 @@
 import { isPatchLive } from "@/lib/sim/engine";
 import { useSim } from "./SimProvider";
 import { ActionPanel } from "./ActionPanel";
-import { HeapVisualizer } from "./HeapVisualizer";
+import { HeapArena } from "./HeapArena";
 import { LogStream } from "./LogStream";
 import { Terminal } from "./Terminal";
 
@@ -13,15 +13,15 @@ export function DefendView() {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="rounded-lg border border-warn/40 bg-warn/5 px-4 py-2.5">
-        <p className="font-mono text-xs text-warn">
+      <div className="glass px-4 py-2.5" style={{ borderColor: "rgb(251 191 36 / 0.3)" }}>
+        <p className="font-mono text-xs text-warn pulse-glow">
           INCIDENT RESPONSE — attacker is progressing in real time. Every action has a cost.
         </p>
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-[280px_1fr_1fr]">
+      <div className="grid gap-4 lg:grid-cols-[280px_1.3fr_1fr]">
         <aside className="flex min-w-0 flex-col gap-4">
-          <section className="rounded-lg border border-border bg-panel p-3">
+          <section className="glass p-3">
             <h2 className="mb-2 font-mono text-xs tracking-widest text-muted uppercase">
               Response actions
             </h2>
@@ -50,13 +50,21 @@ export function DefendView() {
         </aside>
 
         <div className="flex min-w-0 flex-col gap-4">
-          <HeapVisualizer heap={state.heap} />
-          <div className="min-h-[240px] flex-1 rounded-lg border border-border bg-panel">
+          <HeapArena
+            heap={state.heap}
+            focusId={
+              state.heap.find((b) => b.state === "stale" || b.state === "corrupted")
+                ?.id ?? null
+            }
+          />
+          <div className="glass min-h-[240px] flex-1 overflow-hidden">
             <Terminal lines={state.term} className="h-full" />
           </div>
         </div>
 
-        <LogStream logs={state.logs} />
+        <div className="glass">
+          <LogStream logs={state.logs} />
+        </div>
       </div>
     </div>
   );

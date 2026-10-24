@@ -149,7 +149,7 @@ export function Multiplayer() {
 
   if (phase === "room") {
     return (
-      <main className="mx-auto flex min-h-dvh max-w-3xl flex-col items-center justify-center gap-3 p-6">
+      <main className="cyber-bg mx-auto flex min-h-dvh max-w-3xl flex-col items-center justify-center gap-3 p-6">
         <p className="font-mono text-sm text-muted">Joining room…</p>
         {err ? (
           <>
@@ -168,7 +168,7 @@ export function Multiplayer() {
   }
 
   return (
-    <main className="mx-auto flex min-h-dvh w-full max-w-3xl flex-col gap-8 px-4 py-10">
+    <main className="cyber-bg mx-auto flex min-h-dvh w-full max-w-3xl flex-col gap-8 px-4 py-10">
       <header className="flex items-center justify-between">
         <Link href="/" className="font-mono text-xs text-muted hover:text-foreground">
           ← php2shell: live
@@ -178,7 +178,7 @@ export function Multiplayer() {
         </p>
       </header>
 
-      <section className="rounded-lg border border-border bg-panel p-6">
+      <section className="glass p-6">
         <h1 className="font-mono text-lg font-bold text-foreground">
           Incident room
         </h1>

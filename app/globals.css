@@ -1,17 +1,25 @@
 @import "tailwindcss";
 
 :root {
-  --background: #060809;
-  --foreground: #d7e0dd;
-  --panel: #0b0f10;
-  --panel-2: #0e1416;
-  --border: #1c2a2c;
+  /* Command-center palette */
+  --background: #04070d;
+  --foreground: #d7e6ee;
+  --panel: #0a1220;
+  --panel-2: #0d1830;
+  --border: #1c3050;
   --accent: #34d399;
   --accent-dim: #10b981;
   --danger: #f87171;
   --warn: #fbbf24;
   --info: #60a5fa;
-  --muted: #64748b;
+  --muted: #6b7f96;
+  /* Holographic additions */
+  --cyan: #22d3ee;
+  --purple: #a78bfa;
+  --magenta: #f472b6;
+  --glass-bg: rgb(13 24 48 / 0.55);
+  --glass-border: rgb(96 165 250 / 0.22);
+  --glass-glow: rgb(34 211 238 / 0.12);
 }
 
 @theme inline {
@@ -26,6 +34,9 @@
   --color-warn: var(--warn);
   --color-info: var(--info);
   --color-muted: var(--muted);
+  --color-cyan: var(--cyan);
+  --color-purple: var(--purple);
+  --color-magenta: var(--magenta);
   --font-mono: ui-monospace, "SF Mono", "Cascadia Mono", Menlo, Consolas, monospace;
 }
 
@@ -34,6 +45,15 @@ body {
   color: var(--foreground);
   /* Never let a fixed-width child (xterm rows) scroll the whole page. */
   overflow-x: clip;
+}
+
+/* Ambient cyber-lab backdrop: vignette glow + scanline texture. */
+.cyber-bg {
+  background:
+    radial-gradient(1200px 600px at 50% -10%, rgb(34 211 238 / 0.07), transparent 60%),
+    radial-gradient(900px 500px at 85% 110%, rgb(167 139 250 / 0.06), transparent 60%),
+    radial-gradient(700px 400px at 10% 100%, rgb(244 114 182 / 0.04), transparent 60%),
+    var(--background);
 }
 
 /* Subtle CRT scanline texture for the dashboard backdrop. */
@@ -47,6 +67,56 @@ body {
   );
 }
 
+/* Holographic glass panel — translucent, blurred, glowing edge. */
+.glass {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow:
+    0 0 0 1px rgb(34 211 238 / 0.04) inset,
+    0 8px 32px rgb(0 0 0 / 0.45),
+    0 0 24px var(--glass-glow);
+  border-radius: 0.65rem;
+}
+
+.glass-danger {
+  border-color: rgb(248 113 113 / 0.3);
+  box-shadow:
+    0 0 0 1px rgb(248 113 113 / 0.06) inset,
+    0 8px 32px rgb(0 0 0 / 0.45),
+    0 0 24px rgb(248 113 113 / 0.1);
+}
+
+.glass-accent {
+  border-color: rgb(52 211 153 / 0.3);
+  box-shadow:
+    0 0 0 1px rgb(52 211 153 / 0.06) inset,
+    0 8px 32px rgb(0 0 0 / 0.45),
+    0 0 24px rgb(52 211 153 / 0.1);
+}
+
+/* Pulsing glow for live/urgent indicators. */
+@keyframes pulse-glow {
+  0%, 100% { opacity: 1; filter: drop-shadow(0 0 4px currentColor); }
+  50% { opacity: 0.55; filter: drop-shadow(0 0 1px currentColor); }
+}
+.pulse-glow { animation: pulse-glow 2s ease-in-out infinite; }
+
+/* Slow hologram shimmer on panel headers. */
+@keyframes holo-drift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+.holo-title {
+  background: linear-gradient(90deg, var(--cyan), var(--purple), var(--cyan));
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: holo-drift 8s ease-in-out infinite;
+}
+
 /* xterm inherits our palette */
 .xterm {
   padding: 0.75rem;
@@ -54,7 +124,10 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .scanlines {
+  .scanlines,
+  .holo-title,
+  .pulse-glow {
+    animation: none;
     background-image: none;
   }
 }

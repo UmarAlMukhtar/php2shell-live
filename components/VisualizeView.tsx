@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { motion } from "motion/react";
 import { STAGE_TITLES, VISUAL_TIMELINE } from "@/lib/sim/scenario";
 import { useSim } from "./SimProvider";
-import { HeapVisualizer } from "./HeapVisualizer";
+import { HeapArena } from "./HeapArena";
 import { LogStream } from "./LogStream";
 import { Terminal } from "./Terminal";
 import { StageInspector } from "./StageInspector";
@@ -62,10 +62,12 @@ export function VisualizeView() {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="grid gap-4 lg:grid-cols-[220px_1fr_1fr]">
+      <div className="grid gap-4 lg:grid-cols-[220px_1.3fr_1fr]">
         <aside className="order-2 min-w-0 lg:order-1">
-          <StageInspector currentIndex={idx} onJump={jumpTo} />
-          <div className="mt-3">
+          <div className="glass p-3">
+            <StageInspector currentIndex={idx} onJump={jumpTo} />
+          </div>
+          <div className="glass mt-3 p-3">
             <PlaybackControls
               playing={playing}
               atEnd={atEnd}
@@ -81,7 +83,13 @@ export function VisualizeView() {
         </aside>
 
         <div className="order-1 flex min-w-0 flex-col gap-4 lg:order-2">
-          <HeapVisualizer heap={state.heap} />
+          <HeapArena
+            heap={state.heap}
+            focusId={
+              state.heap.find((b) => b.state === "stale" || b.state === "corrupted")
+                ?.id ?? null
+            }
+          />
           {current ? (
             <StageExplanation
               title={STAGE_TITLES[current.stage] ?? current.title}
@@ -98,10 +106,12 @@ export function VisualizeView() {
         </div>
 
         <div className="order-3 flex min-h-[280px] min-w-0 flex-col gap-4 lg:order-3">
-          <div className="min-h-[220px] flex-1 rounded-lg border border-border bg-panel">
+          <div className="glass min-h-[220px] flex-1 overflow-hidden">
             <Terminal lines={state.term} className="h-full" />
           </div>
-          <LogStream logs={state.logs} />
+          <div className="glass">
+            <LogStream logs={state.logs} />
+          </div>
         </div>
       </div>
 
@@ -109,7 +119,7 @@ export function VisualizeView() {
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          className="rounded-lg border border-danger/60 bg-danger/10 p-5 text-center"
+          className="glass glass-danger p-5 text-center"
         >
           <p className="font-mono text-lg font-bold tracking-wider text-danger">
             You watched it happen. Now stop it.

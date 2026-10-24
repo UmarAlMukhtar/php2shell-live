@@ -19,10 +19,12 @@ export function ReportView() {
           onBackToDefend={() => dispatch({ type: "SET_PHASE", phase: "defend" })}
         />
         <div className="flex min-h-[300px] min-w-0 flex-col gap-4">
-          <div className="min-h-[220px] flex-1 rounded-lg border border-border bg-panel">
+          <div className="glass min-h-[220px] flex-1 overflow-hidden">
             <Terminal lines={state.term} className="h-full" />
           </div>
-          <LogStream logs={state.logs} />
+          <div className="glass">
+            <LogStream logs={state.logs} />
+          </div>
         </div>
       </div>
     </div>

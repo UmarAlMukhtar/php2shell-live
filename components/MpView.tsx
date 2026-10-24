@@ -7,7 +7,7 @@ import type { ConnState } from "@/lib/mp/client";
 import { ActionPanel } from "./ActionPanel";
 import { AttackPanel } from "./AttackPanel";
 import { BreachEffect } from "./BreachEffect";
-import { HeapVisualizer } from "./HeapVisualizer";
+import { HeapArena } from "./HeapArena";
 import { IncidentStatus } from "./IncidentStatus";
 import { LogStream } from "./LogStream";
 import { ReportCard } from "./ReportCard";
@@ -47,7 +47,7 @@ export function MpView({
   const report = state.report;
 
   return (
-    <main className="mx-auto flex min-h-dvh w-full max-w-7xl flex-col gap-4 px-4 py-6">
+    <main className="cyber-bg mx-auto flex min-h-dvh w-full max-w-7xl flex-col gap-4 px-4 py-6">
       <BreachEffect active={state.status === "BREACHED"} />
 
       <header className="flex flex-wrap items-center gap-x-4 gap-y-2">
@@ -94,7 +94,11 @@ export function MpView({
           {room.players.map((p) => `${p.name}·${p.role.slice(0, 3)}${p.connected ? "" : "✕"}`).join("  ")}
         </span>
         <span className="ml-auto flex items-center gap-3">
-          <span className="font-mono text-[10px] tracking-widest uppercase text-danger">
+          <span
+            className={`font-mono text-[10px] tracking-widest uppercase ${
+              role === "attacker" ? "text-magenta" : role === "defender" ? "text-cyan" : "text-purple"
+            }`}
+          >
             you: {role}
           </span>
           <button
@@ -115,7 +119,7 @@ export function MpView({
 
       {error ? (
         <div
-          className="flex items-center justify-between rounded border border-danger/50 bg-danger/10 px-3 py-2"
+          className="glass glass-danger flex items-center justify-between px-3 py-2"
           role="alert"
         >
           <p className="font-mono text-xs text-danger">{error}</p>
@@ -136,9 +140,16 @@ export function MpView({
           onBackToDefend={() => void onAct({ kind: "reset" })}
         />
       ) : (
-        <div className="grid gap-4 lg:grid-cols-[280px_1fr_1fr]">
+        <div className="grid gap-4 lg:grid-cols-[280px_1.3fr_1fr]">
           <aside className="flex min-w-0 flex-col gap-4">
-            <section className="rounded-lg border border-border bg-panel p-3">
+            <section
+              className={`glass p-3 ${role === "attacker" ? "glass-danger" : ""}`}
+              style={
+                role === "spectator"
+                  ? { borderColor: "rgb(167 139 250 / 0.3)" }
+                  : undefined
+              }
+            >
               <h2 className="mb-2 font-mono text-xs tracking-widest text-muted uppercase">
                 {role === "attacker"
                   ? "Attack moves"
@@ -205,13 +216,21 @@ export function MpView({
           </aside>
 
           <div className="flex min-w-0 flex-col gap-4">
-            <HeapVisualizer heap={state.heap} />
-            <div className="min-h-[240px] flex-1 rounded-lg border border-border bg-panel">
+            <HeapArena
+              heap={state.heap}
+              focusId={
+                state.heap.find((b) => b.state === "stale" || b.state === "corrupted")
+                  ?.id ?? null
+              }
+            />
+            <div className="glass min-h-[240px] flex-1 overflow-hidden">
               <Terminal lines={state.term} className="h-full" />
             </div>
           </div>
 
-          <LogStream logs={state.logs} />
+          <div className="glass">
+            <LogStream logs={state.logs} />
+          </div>
         </div>
       )}
     </main>
