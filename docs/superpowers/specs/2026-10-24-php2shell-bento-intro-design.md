@@ -13,17 +13,20 @@ SOC-style Bento grid of incident evidence panels — while keeping the approved
 accessible graphite palette, all simulation/multiplayer behavior, and every
 existing state contract.
 
-Reference: 21st.dev `Web3Bento` (id 40327, metadata only — dark surface, lime
-accent, compact Bento cards, live gauges/charts/activity stream, props-driven,
-zero deps). We take the *composition grammar* (dense evidence cards, live
-gauges, activity stream) and not the lime accent or any crypto/financial
-content. No component code is retrieved or copied.
+Reference/starting point: 21st.dev `Web3Bento` (id 40327 by romanvasnev —
+dark surface, lime accent, compact Bento cards, live gauges/charts/activity
+stream, props-driven, zero deps per catalog metadata; registry URL
+`https://21st.dev/r/romanvasnev/web3-bento`, user-supplied). It is the
+*intended presentational starting point* — see Part 1 for the adoption gate.
+Its lime accent and crypto/financial content are not carried over.
 
 ## Global constraints (unchanged — carried from approved spec)
 
 - Simulation engine, room protocol, persistence semantics, and multiplayer
   behavior are out of scope.
-- No new dependencies.
+- No new dependencies by default; the single exception is Web3Bento and
+  only if the source-review gate in Part 1 passes — otherwise the house
+  `BentoGrid` fallback adds nothing.
 - Approved palette only: `--surface-1..3`, `--border`, `--fg/-muted/-faint`,
   `--accent` (blue), `--vuln`/`--attack`/`--breach`/`--contained`/`--ok`,
   `--muted-state` (borders/fills only). Status colors keep their current
@@ -33,8 +36,21 @@ content. No component code is retrieved or copied.
 
 ## Part 1 — SOC Bento composition (visual retune of the entry views)
 
-Adapt the Bento grammar to SOC incident data on `/` (Visualize view) and the
-`/play` lobby — rearranged cards, same components:
+**Source strategy.** The user explicitly supplied
+`npx shadcn@latest add "https://21st.dev/r/romanvasnev/web3-bento"` —
+Web3Bento is the intended starting point for the Bento composition,
+**gated on review**: before any adoption, retrieve the source (via the
+registry MCP/URL; do not blind-install) and review it for (a) its declared
+dependencies — metadata claims zero; (b) props-driven data flow we can feed
+SOC data into; (c) compatibility with Tailwind v4 + `motion` + React 19 and
+the approved tokens. If source is locked/unavailable or the review finds
+it incompatible, fall back to the smallest house-built equivalent: a
+`BentoGrid` wrapper component (12-col grid + card slots) composed of the
+existing panels — no external code. Either way the install/fetch happens
+in the implementation stage, not now.
+
+**Data mapping** — Web3Bento's crypto panels map 1:1 to SOC equivalents,
+same components, same live data:
 
 - **Status strip** (was "net worth + PnL"): `IncidentStatus` pill +
   `VersionBadge` + capacity, pinned as the first card row.
@@ -54,6 +70,8 @@ Layout becomes a dense card grid (`grid-cols-12`-style spans) instead of the
 current rail/canvas/column thirds. On `/`, the stage rail compresses into a
 compact stepper card; on `/play`, lobby cards arrange as Bento tiles.
 Spacing rhythm stays on the existing `gap-4`/`rounded-[10px]`/`border` system.
+All financial/crypto copy, charts and values are replaced — nothing of the
+reference's domain data survives.
 
 Explicitly NOT changed: color tokens, type roles, heap renderer selection,
 `EvidenceSection` lazy-mount behavior, xterm wiring.
@@ -77,16 +95,29 @@ Behavior contract:
   Dismissal or completion writes `p2s.introV2 = "1"` — a dedicated
   namespaced key that never touches `php2shell.sim.v1`, `p2s.intro`,
   `p2s.fxHint`, or `mp.identity`.
-- **Reveal**: the overlay fades into the dashboard (CSS/motion opacity
-  transition, ~600 ms). Under `prefers-reduced-motion` (and when JS reports
-  reduced motion via the existing matchMedia subscription pattern) the
-  dashboard reveals **immediately** with no fade.
+- **Modality (complete)**: while the intro is active it is
+  `role="dialog"` `aria-modal="true"` `aria-labelledby`, and the whole
+  dashboard behind it is `inert` + `aria-hidden="true"` — not just
+  pointer-inert. Initial focus lands on the Skip button; the only
+  interactive content is inside the dialog, so focus cannot escape (Tab
+  cycles within the dialog's controls). On dismiss, focus moves to the
+  dashboard `<h1>` (given `tabIndex={-1}`), not to a random control.
+- **Playback gate**: the Visualize timeline currently auto-starts — under
+  the intro it must not advance unseen. While the intro is shown, the sim
+  mounts but autoplay is held (no ticks advance) until the user
+  dismisses/completes the intro **and** the reveal transition finishes;
+  only then does playback begin. Saved-state visitors never see the intro
+  and resume normally.
+- **Reveal**: on dismiss, the overlay fades out into the dashboard over
+  **≤ 600 ms**; total intro-close-to-interactive-dashboard ≤ **1 s**
+  (fade + mount margin). Under `prefers-reduced-motion` (existing
+  matchMedia subscription pattern) there is no fade — the dashboard is
+  revealed immediately.
+- **Text animation vs AT**: story lines may stagger visually (opacity
+  only), but every line is present in the DOM from mount — assistive tech
+  reads the full narrative immediately; no content is gated on animation.
 - **Fail-open**: if storage read/write throws (private mode, blocked
   storage), the intro is skipped — never blocks the dashboard.
-- **Focus**: while open, the overlay is `role="dialog"` `aria-modal="true"`,
-  labelled, and the Skip button is focusable; focus returns to the dashboard
-  on close. The dashboard behind it stays inert to pointer input; the overlay is a
-  fixed-position layer, so no scroll-lock is needed.
 - **No gating elsewhere**: `/play` (lobby, `?code=` deep links, refresh
   reconnect) never shows or waits on the intro.
 - **Sibling hint**: the existing `p2s.intro` primer card stays and still
@@ -101,15 +132,20 @@ conditions, "everything below is simulated".
 ## Out of scope
 
 - Simulation engine, game rules, network protocol, persistence semantics,
-  multiplayer behavior.
-- New dependencies, shadcn installs, or 21st.dev component code.
+  multiplayer behavior. (The playback-start *timing* above is a
+  presentation-layer gate, not a rules change.)
+- Running installs now — source retrieval/review of Web3Bento happens in
+  the implementation stage; if adopted it may pull the shadcn registry
+  deps it declares, reviewed first. Any new dependency must be justified
+  by that review, else the house `BentoGrid` fallback is used.
 - Forensics internals, report content, API routes, tests' behavioral logic.
 
 ## Assumptions
 
-- The Web3Bento *reference* informs composition only; its lime accent is
-  deliberately not adopted (the approved blue accent is the accessible
-  choice already measured).
+- Web3Bento's lime accent and crypto content are deliberately not
+  adopted (the approved blue accent is the accessible choice already
+  measured); only its Bento composition grammar/data-flow is reused, and
+  only after the source review gate passes.
 - `p2s.introV2` is a fresh namespaced key; `p2s.intro` remains for the
   in-dashboard primer card.
 - Intro is client-only (`"use client"`), no route/middleware changes.
@@ -117,14 +153,18 @@ conditions, "everything below is simulated".
 
 ## Acceptance criteria
 
-- First visit at `/`: overlay shows facts, Skip visible + focusable, Esc
-  works, dashboard behind is dimmed/inert; dismissing fades (or snaps under
-  reduced-motion) to the dashboard; `p2s.introV2` set.
+- First visit at `/`: overlay shows facts, Skip visible + focused, Esc
+  works, dashboard behind is `inert`/`aria-hidden`; dismissing fades (or
+  snaps under reduced-motion) to the dashboard; `p2s.introV2` set.
 - Repeat visit / saved `php2shell.sim.v1` / `/play?code=X`: no intro.
 - `localStorage.setItem` throwing → dashboard renders immediately.
 - No horizontal overflow at 390/768/1440 on `/` and `/play`.
 - Status colors keep approved semantics; contrast unchanged (tokens
   untouched).
-- Focus trap not required beyond Skip (single action); focus returns to
-  page on dismiss.
+- While open: dashboard `inert`/`aria-hidden`, initial focus on Skip,
+  focus cannot leave the dialog; after dismiss focus lands on the
+  dashboard `<h1>`.
+- No sim ticks elapse while the intro is up; playback starts only after
+  dismiss + reveal (≤ 1 s); reduced-motion shows the dashboard
+  immediately.
 - Existing 66 Vitest tests still pass; lint/typecheck/build clean.
