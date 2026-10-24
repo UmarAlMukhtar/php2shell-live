@@ -123,6 +123,7 @@ export async function handleClientMsg(
   const msg = raw as ClientMsg;
 
   if (msg?.type === "ping") {
+    if (ctx.playerId) void store.touch(code, ctx.playerId).catch(() => {});
     send(ws, { type: "pong" });
     return;
   }

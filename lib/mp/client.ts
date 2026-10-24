@@ -57,8 +57,10 @@ export function clearIdentity() {
 export class MpClient {
   private ws: WebSocket | null = null;
   private pollTimer: ReturnType<typeof setTimeout> | null = null;
+  private hbTimer: ReturnType<typeof setInterval> | null = null;
   private closed = false;
   private conn: ConnState = "connecting";
+  private lastRoom: RoomSnapshot | null = null;
   seq = -1;
 
   constructor(
@@ -106,6 +108,8 @@ export class MpClient {
       clearTimeout(timeout);
       this.sayHello();
       this.setConn("live");
+      // Heartbeat keeps presence fresh while the socket is open.
+      this.hbTimer = setInterval(() => this.wsSend({ type: "ping" }), 4000);
     };
     ws.onmessage = (ev) => {
       let msg: ServerMsg;
@@ -118,6 +122,10 @@ export class MpClient {
     };
     ws.onclose = () => {
       clearTimeout(timeout);
+      if (this.hbTimer) {
+        clearInterval(this.hbTimer);
+        this.hbTimer = null;
+      }
       if (this.closed) return;
       // Reconnect after a beat; if WS never comes back, polling takes over.
       this.startPolling();
@@ -167,6 +175,7 @@ export class MpClient {
 
   private push(room: RoomSnapshot) {
     this.seq = room.seq;
+    this.lastRoom = room;
     this.h.onState(room);
   }
 
@@ -177,13 +186,17 @@ export class MpClient {
       if (this.closed) return;
       try {
         const res = await fetch(
-          `/api/room/${this.id.code}/state?seq=${this.seq}`,
+          `/api/room/${this.id.code}/state?seq=${this.seq}&pid=${this.id.playerId}`,
         );
         if (res.ok) {
           const data = (await res.json()) as {
             room?: RoomSnapshot;
+            players?: RoomSnapshot["players"];
           };
           if (data.room) this.push(data.room);
+          else if (data.players && this.lastRoom) {
+            this.push({ ...this.lastRoom, players: data.players });
+          }
         } else if (res.status === 404) {
           this.h.onError("Room closed.");
           this.destroy();
@@ -228,6 +241,7 @@ export class MpClient {
   destroy() {
     this.closed = true;
     if (this.pollTimer) clearTimeout(this.pollTimer);
+    if (this.hbTimer) clearInterval(this.hbTimer);
     this.ws?.close();
   }
 }

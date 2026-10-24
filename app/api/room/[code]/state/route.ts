@@ -11,10 +11,18 @@ export async function GET(
 ) {
   const { code } = await params;
   const since = Number(req.nextUrl.searchParams.get("seq") ?? -1);
-  const room = await getRoomStore().get(code.toUpperCase());
+  const pid = req.nextUrl.searchParams.get("pid");
+  const store = getRoomStore();
+  if (pid) void store.touch(code.toUpperCase(), pid).catch(() => {});
+  const room = await store.get(code.toUpperCase());
   if (!room) return NextResponse.json({ error: "room_not_found" }, { status: 404 });
   if (room.seq <= since) {
-    return NextResponse.json({ seq: room.seq, unchanged: true });
+    // Still surface presence changes (heartbeat-derived) between seq bumps.
+    return NextResponse.json({
+      seq: room.seq,
+      unchanged: true,
+      players: snapshot(room).players,
+    });
   }
   return NextResponse.json({ seq: room.seq, room: snapshot(room) });
 }

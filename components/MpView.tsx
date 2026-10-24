@@ -140,18 +140,27 @@ export function MpView({
           <aside className="flex min-w-0 flex-col gap-4">
             <section className="rounded-lg border border-border bg-panel p-3">
               <h2 className="mb-2 font-mono text-xs tracking-widest text-muted uppercase">
-                {role === "attacker" ? "Attack moves" : "Response actions"}
+                {role === "attacker"
+                  ? "Attack moves"
+                  : role === "defender"
+                    ? "Response actions"
+                    : "Spectating"}
               </h2>
               {role === "attacker" ? (
                 <AttackPanel
                   state={state}
                   onAction={(id) => void onAct({ kind: "attack", id })}
                 />
-              ) : (
+              ) : role === "defender" ? (
                 <ActionPanel
                   state={state}
                   onAction={(id) => void onAct({ kind: "defend", id })}
                 />
+              ) : (
+                <p className="px-1 py-2 font-mono text-xs leading-5 text-muted">
+                  Both seats are taken — watching live. If a player drops, rejoin
+                  to take the seat.
+                </p>
               )}
             </section>
             {role === "defender" ? (

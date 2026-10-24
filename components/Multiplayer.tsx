@@ -39,7 +39,16 @@ export function Multiplayer() {
       onState: setRoom,
       onConn: setConn,
       onWelcome: (r) => setMyRole(r),
-      onError: (m) => setErr(m),
+      onError: (m) => {
+        setErr(m);
+        // Fatal join errors (dead room / invalid session) → back to lobby.
+        if (m === "Room closed." || m === "invalid_session") {
+          clearIdentity();
+          setRoom(null);
+          setPhase("lobby");
+          history.replaceState(null, "", "/play");
+        }
+      },
     });
     clientRef.current = client;
     if (knownRole) setMyRole(knownRole);
@@ -142,7 +151,18 @@ export function Multiplayer() {
     return (
       <main className="mx-auto flex min-h-dvh max-w-3xl flex-col items-center justify-center gap-3 p-6">
         <p className="font-mono text-sm text-muted">Joining room…</p>
-        {err ? <p className="font-mono text-xs text-danger">{err}</p> : null}
+        {err ? (
+          <>
+            <p className="font-mono text-xs text-danger" role="alert">{err}</p>
+            <button
+              type="button"
+              onClick={leave}
+              className="rounded border border-border px-3 py-1.5 font-mono text-xs text-foreground hover:border-accent/60"
+            >
+              Back to lobby
+            </button>
+          </>
+        ) : null}
       </main>
     );
   }

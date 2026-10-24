@@ -47,8 +47,16 @@ export async function createRoom(store: RoomStore): Promise<Room> {
   throw new Error("could not allocate a room code");
 }
 
+const PRESENCE_MS = 9000;
+
 function pickRole(room: Room, requested?: Role): Role {
-  const taken = new Set(room.players.map((p) => p.role));
+  // Only live players hold a role — a dropped attacker's seat frees up.
+  const now = Date.now();
+  const taken = new Set(
+    room.players
+      .filter((p: Player) => p.connected && now - p.lastSeen < PRESENCE_MS)
+      .map((p: Player) => p.role),
+  );
   if (requested && requested !== "spectator" && !taken.has(requested)) return requested;
   for (const role of ["defender", "attacker"] as const) {
     if (!taken.has(role)) return role;
@@ -112,16 +120,24 @@ export async function markConnected(
   const p = room.players.find((pl: Player) => pl.id === playerId);
   if (!p) return;
   p.connected = connected;
-  p.lastSeen = Date.now();
+  // Instant "left" marker on explicit disconnect; liveness otherwise derives
+  // from heartbeat freshness (works for WS and polling clients alike).
+  p.lastSeen = connected ? Date.now() : 0;
   await store.cas(code, room.seq, { ...room, seq: room.seq + 1, updatedAt: Date.now() });
 }
 
 /** Strip secrets for client consumption. */
 export function snapshot(room: Room): RoomSnapshot {
+  const now = Date.now();
   return {
     code: room.code,
     seq: room.seq,
-    players: room.players.map(({ id, role, name, connected }) => ({ id, role, name, connected })),
+    players: room.players.map(({ id, role, name, connected, lastSeen }) => ({
+      id,
+      role,
+      name,
+      connected: connected && now - lastSeen < PRESENCE_MS,
+    })),
     sim: room.sim,
   };
 }

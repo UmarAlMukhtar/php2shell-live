@@ -25,6 +25,23 @@ One continuous journey: **Visualize → Defend → Verify**.
 - **Verify** — replays the modeled attack and reports PATCHED or explains
   which defense was insufficient.
 
+## Multiplayer (`/play`)
+
+Real-time attacker-vs-defender rooms on top of the same simulation engine:
+
+- Create a room → share the 4-letter code, link, or QR code.
+- One player attacks (recon → probe → trigger → groom → UAF → breach), one
+  defends; spectators watch when both seats are taken.
+- The server validates every action, gates it by role, and serializes state
+  with compare-and-set so concurrent moves can't clobber each other.
+- Transport: native WebSocket on Vercel Functions (`upgradeWebSocket`) with
+  an automatic REST polling fallback; heartbeats drive presence.
+- Refresh recovery via sessionStorage identity; a dropped player's seat
+  frees up after the presence window.
+- Room state lives in an in-memory store locally and Upstash Redis on
+  Vercel (`UPSTASH_REDIS_REST_URL`/`UPSTASH_REDIS_REST_TOKEN`), so players
+  on different function instances stay in sync.
+
 ## Getting started
 
 ```bash
