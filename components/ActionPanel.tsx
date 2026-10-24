@@ -28,10 +28,10 @@ export function ActionPanel({ state, onAction }: Props) {
               onMouseLeave={() => setOpenHint(null)}
               onFocus={() => setOpenHint(def.id)}
               onBlur={() => setOpenHint(null)}
-              className={`w-full rounded border px-3 py-2.5 text-left font-mono text-xs transition-colors focus-visible:outline-2 focus-visible:outline-accent ${
+              className={`w-full rounded-lg border px-3 py-2.5 text-left text-xs font-medium transition-colors focus-visible:outline-2 focus-visible:outline-accent ${
                 disabled
-                  ? "cursor-not-allowed border-border/60 bg-panel text-muted/60"
-                  : "border-border bg-panel-2 text-foreground hover:border-accent/60 hover:bg-accent/5"
+                  ? "cursor-not-allowed border-border/50 bg-surface-1 text-fg-faint"
+                  : "border-border bg-surface-2 text-fg hover:border-accent/60 hover:bg-accent/5"
               }`}
               aria-describedby={`hint-${def.id}`}
             >
@@ -41,7 +41,7 @@ export function ActionPanel({ state, onAction }: Props) {
             </button>
             <p
               id={`hint-${def.id}`}
-              className={`px-3 pt-1 font-mono text-[10px] leading-4 text-muted transition-opacity ${
+              className={`px-3 pt-1 text-[11px] leading-4 text-fg-muted transition-opacity ${
                 openHint === def.id || blocked ? "opacity-100" : "opacity-60"
               }`}
             >

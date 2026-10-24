@@ -3,6 +3,7 @@
 import { isPatchLive } from "@/lib/sim/engine";
 import { useSim } from "./SimProvider";
 import { ActionPanel } from "./ActionPanel";
+import { EvidenceSection } from "./EvidenceSection";
 import { HeapArena } from "./HeapArena";
 import { LogStream } from "./LogStream";
 import { Terminal } from "./Terminal";
@@ -13,16 +14,16 @@ export function DefendView() {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="glass px-4 py-2.5" style={{ borderColor: "rgb(251 191 36 / 0.3)" }}>
-        <p className="font-mono text-xs text-warn pulse-glow">
+      <div className="rounded-[10px] border border-attack/50 bg-surface-1 px-4 py-2.5">
+        <p className="text-xs font-semibold tracking-wide text-attack">
           INCIDENT RESPONSE — attacker is progressing in real time. Every action has a cost.
         </p>
       </div>
 
       <div className="grid gap-4 lg:grid-cols-[280px_1.3fr_1fr]">
         <aside className="flex min-w-0 flex-col gap-4">
-          <section className="glass p-3">
-            <h2 className="mb-2 font-mono text-xs tracking-widest text-muted uppercase">
+          <section className="rounded-[10px] border border-border bg-surface-1 p-3">
+            <h2 className="mb-2 text-xs font-semibold tracking-widest text-fg-muted uppercase">
               Response actions
             </h2>
             <ActionPanel
@@ -33,16 +34,16 @@ export function DefendView() {
           <button
             type="button"
             onClick={() => dispatch({ type: "VERIFY" })}
-            className={`rounded border px-4 py-3 font-mono text-sm font-bold tracking-widest transition-colors focus-visible:outline-2 ${
+            className={`rounded-lg border px-4 py-3 text-sm font-bold tracking-widest transition-colors focus-visible:outline-2 ${
               patchLive
-                ? "border-accent bg-accent/15 text-accent hover:bg-accent/25 focus-visible:outline-accent"
-                : "border-border bg-panel-2 text-muted hover:border-foreground/40 focus-visible:outline-foreground"
+                ? "border-accent bg-accent text-accent-fg hover:bg-accent/85 focus-visible:outline-accent"
+                : "border-border bg-surface-2 text-fg-faint hover:border-fg-faint focus-visible:outline-fg"
             }`}
             data-testid="verify-btn"
           >
             VERIFY REMEDIATION →
           </button>
-          <p className="font-mono text-[10px] leading-4 text-muted">
+          <p className="text-[11px] leading-4 text-fg-faint">
             {patchLive
               ? "patched build is live — replay the attack to confirm."
               : "replays the modeled attack. Without a live patch it will succeed."}
@@ -57,14 +58,16 @@ export function DefendView() {
                 ?.id ?? null
             }
           />
-          <div className="glass min-h-[240px] flex-1 overflow-hidden">
-            <Terminal lines={state.term} className="h-full" />
-          </div>
+          <EvidenceSection title="Simulated terminal" className="min-h-[240px] flex-1">
+            <Terminal lines={state.term} className="h-full min-h-[240px]" />
+          </EvidenceSection>
         </div>
 
-        <div className="glass">
-          <LogStream logs={state.logs} />
-        </div>
+        <EvidenceSection title="Security logs">
+          <div className="max-h-72 overflow-hidden">
+            <LogStream logs={state.logs} />
+          </div>
+        </EvidenceSection>
       </div>
     </div>
   );
