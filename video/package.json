@@ -1,0 +1,17 @@
+{
+  "name": "p2s-launch-video",
+  "private": true,
+  "version": "0.0.0",
+  "scripts": {
+    "render": "remotion render src/index.tsx Main out/php2shell-live-demo.mp4 --codec h264 --crf 23",
+    "still": "remotion still src/index.tsx Main out/poster.png --frame=1240",
+    "studio": "remotion studio src/index.tsx"
+  },
+  "dependencies": {
+    "@remotion/cli": "^4.0.538",
+    "@remotion/google-fonts": "^4.0.538",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "remotion": "^4.0.538"
+  }
+}

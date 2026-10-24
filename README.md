@@ -13,6 +13,37 @@ https://php2shell-live.vercel.app — first deployment (production domain of
 the hobby project; the repo is git-connected so pushes auto-deploy and PRs
 get preview deployments).
 
+## Demo video (42 s, silent, caption-led)
+
+[![PHP2Shell: Live demo video — watch the attack, then defend it](docs/media/poster.png)](docs/media/php2shell-live-demo.mp4)
+
+The opening heap strip is a labeled illustration; every product frame is a
+real production capture. The full edit plan lives in `storyboard.json`.
+
+### Screenshots
+
+| | |
+|---|---|
+| ![First-visit intro narrating the incident before revealing the dashboard](docs/media/intro-modal.png) | ![Five-stage heap incident at BREACHED: 3D arena, stage rail, status telemetry](docs/media/visualize-incident.png) |
+| ![Forensics console: live model invariants and verified properties](docs/media/forensics-console.png) | ![Defend view: ordered response actions, live heap arena, terminal + logs](docs/media/defend-actions.png) |
+| ![Verify report after a truthful full journey: PATCHED, attack deflected](docs/media/verify-report.png) | ![Multiplayer lobby: attacker vs defender roles, host or join by code](docs/media/multiplayer-lobby.png) |
+| ![Mobile lobby at 390px](docs/media/mobile-390.png) | |
+
+### Regenerate the video
+
+```bash
+cd video
+npm install
+npm run render   # remotion render src/index.tsx Main out/php2shell-live-demo.mp4 --codec h264 --crf 23
+npm run still    # poster frame -> out/poster.png
+```
+
+Sources: `storyboard.json` (scene timings/captions), `video/src/` (composition
+at 1920x1080, 30 fps). Screenshots are consumed straight from `docs/media/`
+via `Config.setPublicDir`; the small `docs/media/crops/` derivatives are
+ffmpeg re-crops of the same captures (regenerate with `ffmpeg -i <src> -vf
+crop=iw*W:ih*H:iw*X:ih*Y`).
+
 ## The game
 
 One continuous journey: **Visualize → Defend → Verify**.

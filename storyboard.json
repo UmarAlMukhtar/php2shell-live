@@ -1,0 +1,182 @@
+{
+  "meta": {
+    "title": "PHP2Shell: Live \u2014 product demo (hackathon submission)",
+    "durationSec": 42,
+    "fps": 30,
+    "width": 1920,
+    "height": 1080,
+    "narrativeStructure": "problem-solution",
+    "publishingContext": "Silent caption-led judges' cut for Devin Hacks Kochi, 16:9 web embed + README poster. No audio track; every claim must read on screen.",
+    "aestheticDirection": "SOC Signal \u2014 dark operations-dashboard identity: layered graphite panels, hairline grid, cyan signal accents, amber vulnerability, breach-red, restrained kinetic typography. All product frames are real screenshots of the production build.",
+    "fonts": {
+      "display": {
+        "family": "Space Grotesk",
+        "weights": [
+          "500",
+          "700"
+        ]
+      },
+      "body": {
+        "family": "JetBrains Mono",
+        "weights": [
+          "400",
+          "500"
+        ]
+      }
+    },
+    "colors": {
+      "background": "#0B0E13",
+      "surface": "#141A23",
+      "primary": "#E8EDF4",
+      "muted": "#8B99AC",
+      "accent": "#22D3EE",
+      "vuln": "#F59E0B",
+      "breach": "#EE5F55",
+      "ok": "#4ADE80"
+    }
+  },
+  "voice": {
+    "enabled": false,
+    "gender": "neutral",
+    "age": "middle-aged",
+    "tone": [
+      "calm",
+      "precise"
+    ],
+    "accent": "neutral",
+    "pace": "moderate"
+  },
+  "assets": {
+    "screenshots": {
+      "intro-modal.png": "First-visit intro dialog over dimmed inert dashboard (real capture)",
+      "visualize-incident.png": "Visualize stage 5 \u2014 3D heap arena, corrupted/stale blocks, BREACHED status (real capture)",
+      "forensics.png": "Incident report + Forensics console strip with Inspector/Trace/A-B replay/Checks tabs (real capture)",
+      "defend-actions.png": "Defend phase \u2014 response action list with prerequisites, VERIFY REMEDIATION CTA (real capture)",
+      "verify-report.png": "Truthful PATCHED incident report, actions 1-6 listed, attacker DEFLECTED (real capture)",
+      "multiplayer-lobby.png": "/play lobby \u2014 ATTACKER/DEFENDER role cards, host/join (real capture)",
+      "mobile-390.png": "390px /play lobby stacking (real capture)"
+    }
+  },
+  "scenes": [
+    {
+      "id": "hook-signal",
+      "act": "hook",
+      "startSec": 0,
+      "durationSec": 2.6,
+      "purpose": "Pose the problem: memory corruption is invisible until it's too late.",
+      "emotionalBeat": "Tension \u2014 something is wrong inside the machine and you can't see it.",
+      "voiceover": null,
+      "layout": "Full-bleed graphite field. Top-left mono kicker 'INCIDENT FEED / CVE-2026-109619'. Center: one row of 24 abstract heap cells (labeled clearly: 'SIMULATED \u2014 ILLUSTRATIVE HEAP') filling left\u2192right blue\u2192amber\u2192red. Caption beneath.",
+      "elements": "Heap cell strip (24 rounded squares, border stroke only \u2014 explicitly stylized, not a UI screenshot); caption line 'A stale pointer survives an aborted request.'; label chip 'SIMULATED \u2014 ILLUSTRATIVE HEAP'; headline 'MAKE THE INVISIBLE VISIBLE' slams in at ~2.6s.",
+      "animation": "Cells pop in with 40ms stagger (scale 0\u21921, opacity 0\u21921); cells 14-18 flip to breach-red at 1.4s with a pulse; caption typewriters at 40 chars/s; headline springs in scale 0.85\u21921 + blur 10\u21920 at 2.6s; ambient grid breathes at 4% opacity.",
+      "camera": "Slow 2% zoom-in over the scene.",
+      "lighting": "Single cyan radial glow behind the cell strip; vignette edges.",
+      "transitionOut": "Cells scatter/dissolve as the real dashboard screenshot materializes underneath (cross-zoom into reveal)."
+    },
+    {
+      "id": "reveal-product",
+      "act": "reveal",
+      "startSec": 2.6,
+      "durationSec": 5.4,
+      "purpose": "Introduce PHP2Shell: Live as the product that makes this visible. Hero moment.",
+      "emotionalBeat": "Relief + intrigue \u2014 there is a tool for this.",
+      "voiceover": null,
+      "layout": "Center hero: real screenshot visualize-incident.png on a raised surface card, tilted ~6\u00b0 perspective. Left third: title stack 'PHP2Shell: Live' (display font) + CVE badge chip + one-line descriptor. Bottom-right: 'educational simulation' honesty chip.",
+      "elements": "Screenshot card with hairline border + soft cyan edge-light; title 'PHP2Shell: Live'; chips 'CVE-2026-109619', 'SIMULATED TRAINING ENVIRONMENT'; descriptor 'A deterministic incident-response simulator for the heap you can't see.'",
+      "animation": "Screenshot enters scale 1.08\u21921 + opacity + blur 12\u21920 over 0.7s, gentle settle tilt; title characters cascade 25ms stagger translateY(18)\u21920 + opacity; chips pop with spring at 0.9s/1.05s; light sweep crosses the card at 2.8s.",
+      "camera": "Push-in 1.03x over scene; screenshot has its own slow 1.04x Ken Burns drift.",
+      "lighting": "Cyan rim on the card's top edge; background glow orb drifting right.",
+      "transitionOut": "Screenshot slides right and scales up as scene cuts to the Visualize walkthrough (momentum continues rightward)."
+    },
+    {
+      "id": "showcase-visualize",
+      "act": "showcase",
+      "startSec": 8,
+      "durationSec": 6,
+      "purpose": "Show the core feature: a five-stage exploit played out on a live heap arena.",
+      "emotionalBeat": "Understanding \u2014 'I can actually see the UAF form.'",
+      "voiceover": null,
+      "layout": "Screenshot dominates left 72% of frame at near-full height. Right rail: three callout labels stacked vertically, each with a thin leader line pointing into the screenshot regions.",
+      "elements": "Callout 1 '5-stage incident rail \u2014 suspicious input \u2192 compromise' (\u2192 stage list); Callout 2 '3D heap arena \u2014 allocation states in semantic color' (\u2192 arena); Callout 3 'status pill: SAFE \u2192 BREACHED' (\u2192 top-right pill).",
+      "animation": "Screenshot slides in from right with parallax shadow; callouts enter bottom-up with 140ms stagger (translateY 24\u21920, opacity, blur 6\u21920); each leader line draws itself (scaleX 0\u21921) 100ms after its label.",
+      "camera": "Static framing; screenshot does a slow pan left inside its mask.",
+      "lighting": "Breach-red accent glow only behind the corrupted heap region of the screenshot.",
+      "transitionOut": "Right rail callouts collapse into a single line that morphs into the next scene's tab bar."
+    },
+    {
+      "id": "showcase-forensics",
+      "act": "showcase",
+      "startSec": 14,
+      "durationSec": 5,
+      "purpose": "Show evidence tooling: every allocation inspectable, exploit replayable.",
+      "emotionalBeat": "Depth \u2014 this isn't a toy animation, it's an inspectable model.",
+      "voiceover": null,
+      "layout": "Top: four tab chips (INSPECTOR / TRACE / A-B REPLAY / CHECKS) as a kinetic row. Below: forensics.png screenshot occupying full width lower 70%, slightly cropped to the console region.",
+      "elements": "Tab chips act as the scene's navigational motif; caption 'Inspect every allocation. Replay exploit vs patched runtime.' Mono text.",
+      "animation": "Tabs cascade center-out with 90ms stagger (scale 0.8\u21921, opacity); active underline slides under each tab in sequence (INSPECTOR\u2192TRACE\u2192A/B\u2192CHECKS, 500ms apart); screenshot rises 30px + opacity + blur over 0.6s.",
+      "camera": "Subtle pan down inside the screenshot mask to reveal the console strip.",
+      "lighting": "Neutral; cyan underline glow only.",
+      "transitionOut": "Whole frame dips 20px + dims as defend scene rises over it (depth handoff)."
+    },
+    {
+      "id": "showcase-defend",
+      "act": "showcase",
+      "startSec": 19,
+      "durationSec": 6,
+      "purpose": "Show gameplay: real incident response \u2014 actions have prerequisites and costs.",
+      "emotionalBeat": "Agency \u2014 'I get to stop it.'",
+      "voiceover": null,
+      "layout": "defend-actions.png screenshot fills right 68%. Left column: action list echoed as kinetic items (inspect \u2192 investigate \u2192 block \u2192 isolate \u2192 patch \u2192 restart \u2192 verify) checking off one by one.",
+      "elements": "Seven mono action lines; each gets a cyan check-flip as it 'applies'; caption 'prerequisites enforced \u2014 only the right patch remediates'.",
+      "animation": "Screenshot enters from bottom with scale 0.96\u21921; action items appear with 120ms stagger then flip to checked state with a 250ms settle each; a progress hairline fills top-to-bottom beside the list.",
+      "camera": "Static; screenshot drifts 1.03x Ken Burns.",
+      "lighting": "Amber glow that cools toward cyan as checks complete (containment metaphor).",
+      "transitionOut": "Checked list compresses into a horizontal ribbon feeding the multiplayer scene."
+    },
+    {
+      "id": "showcase-multiplayer",
+      "act": "showcase",
+      "startSec": 25,
+      "durationSec": 4,
+      "purpose": "Show it's social: attacker vs defender rooms on the same engine.",
+      "emotionalBeat": "Competition \u2014 'I can play this against someone.'",
+      "voiceover": null,
+      "layout": "multiplayer-lobby.png centered and scaled; ATTACKER and DEFENDER role cards echoed as two big labels sliding in from opposite edges. Mobile 390px capture peeks in bottom-right at small scale as a 'responsive' proof.",
+      "elements": "Two role labels (breach-red ATTACKER, accent-blue DEFENDER) with a 'VS' pulse between; caption 'same simulation, live \u2014 host, join, or spectate'.",
+      "animation": "Labels slide toward center from \u00b140% offscreen, meet with a soft impact pulse at 1.2s; mobile capture springs in at 2s (scale 0.7\u21921); screenshot ambient 1.04x drift.",
+      "camera": "Static; labels carry the motion.",
+      "lighting": "Split glow: red left / blue right blending at center.",
+      "transitionOut": "Labels split back out as the verify report slams into center (energy hands off to climax)."
+    },
+    {
+      "id": "climax-patched",
+      "act": "climax",
+      "startSec": 29,
+      "durationSec": 6.2,
+      "purpose": "The payoff: a truthful PATCHED report \u2014 proof the lesson landed.",
+      "emotionalBeat": "Triumph \u2014 the exploit is dead.",
+      "voiceover": null,
+      "layout": "verify-report.png hero at 62% width center; giant 'PATCHED' wordmark overlays top-left, cropped bold; action checklist strip along bottom.",
+      "elements": "'PATCHED' wordmark (ok-green outline + fill sweep); screenshot card; six check pips in a row labeled 1-6; caption 'replay the attack \u2014 prove the fix'.",
+      "animation": "Screenshot scales 0.88\u21921 with heavy spring; 'PATCHED' slams scale 1.4\u21921 + blur 14\u21920 at 0.5s with a green shockwave ring expanding past the frame; check pips pop sequentially 80ms apart; subtle confetti-free dignity \u2014 a single light sweep at 4s.",
+      "camera": "Slow push 1.05x into the report card.",
+      "lighting": "Green radial crescendo behind the card; rest of frame stays graphite.",
+      "transitionOut": "Wordmark drifts up; scene darkens to title card."
+    },
+    {
+      "id": "close-cta",
+      "act": "close",
+      "startSec": 35.2,
+      "durationSec": 6.8,
+      "purpose": "Brand + CTA: leave the URL and the one-line pitch.",
+      "emotionalBeat": "Resolve \u2014 go play it.",
+      "voiceover": null,
+      "layout": "Centered title 'PHP2Shell: Live' large; beneath it the tagline; beneath that the URL in a pill; bottom edge mono disclaimer line.",
+      "elements": "Title; tagline 'Watch a use-after-free form on a live heap \u2014 then stop it.'; URL pill 'php2shell-live.vercel.app'; disclaimer 'educational simulation \u2014 fictional targets only \u00b7 single-player + attacker-vs-defender multiplayer'.",
+      "animation": "Title draws in with per-character cascade + underline beam sweep; tagline fades+slides at 1s; URL pill springs at 1.6s with cyan ring pulse repeating every 2s; disclaimer fades at 2.4s; ambient particles drift upward throughout.",
+      "camera": "Static \u2014 let it breathe.",
+      "lighting": "Cyan underline beam is the only strong light; vignette holds.",
+      "transitionOut": "Hold last frame (poster frame) \u2014 title + URL."
+    }
+  ]
+}
