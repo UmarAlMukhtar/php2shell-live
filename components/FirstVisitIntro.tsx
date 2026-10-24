@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { motion, useReducedMotion } from "motion/react";
 import { CVE } from "@/lib/sim/cve";
-import { markIntroSeen } from "@/lib/ui/introGate";
 
 /** Fade-out + mount margin before the dashboard is interactive again. */
 const REVEAL_MS = 600;
@@ -37,7 +36,6 @@ export function FirstVisitIntro({ onDone }: Props) {
   const dismiss = useCallback(() => {
     if (closing) return;
     setClosing(true);
-    markIntroSeen(typeof localStorage === "undefined" ? null : localStorage);
     window.setTimeout(onDone, reduced ? 0 : REVEAL_MS);
   }, [closing, onDone, reduced]);
 

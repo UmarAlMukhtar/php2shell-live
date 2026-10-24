@@ -24,11 +24,15 @@ export function markIntroSeen(storage: Writer): void {
   }
 }
 
-/** True when a resumable simulation exists (visitor is mid-incident or
- *  has a completed report) — the intro must not gate a restore. */
+/** True when a *meaningfully progressed* simulation exists — the intro must
+ *  not gate a restore. A fresh visit's own initial state (`tick:0`,
+ *  `visualStepIndex:-1`, phase "visualize") is persisted by SimProvider right
+ *  after hydration, so a bare existence check would race against it. */
 export function hasSavedSim(storage: Reader): boolean {
   try {
-    return readSavedSim(storage) !== null;
+    const s = readSavedSim(storage);
+    if (!s) return false;
+    return s.tick > 0 || s.visualStepIndex >= 0 || s.phase !== "visualize";
   } catch {
     return false;
   }

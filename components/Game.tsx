@@ -16,6 +16,24 @@ import { IntroGate } from "./IntroGate";
 
 const noopSub = () => () => {};
 
+// Storage can throw (private mode, blocked storage) — flags fail open to
+// "seen" so the dashboard always renders.
+function flagSeen(key: string): boolean {
+  try {
+    return localStorage.getItem(key) === "1";
+  } catch {
+    return true;
+  }
+}
+
+function flagWrite(key: string): void {
+  try {
+    localStorage.setItem(key, "1");
+  } catch {
+    // non-fatal
+  }
+}
+
 const PHASES = ["visualize", "defend", "verify"] as const;
 const PHASE_LABELS: Record<(typeof PHASES)[number], string> = {
   visualize: "① VISUALIZE",
@@ -43,13 +61,13 @@ function ForensicsToggle() {
   const [, force] = useReducer((x: number) => x + 1, 0);
   const hintSeen = useSyncExternalStore(
     noopSub,
-    () => localStorage.getItem("p2s.fxHint") === "1",
+    () => flagSeen("p2s.fxHint"),
     () => true,
   );
   if (!fx) return null;
   const showHint = !hintSeen && !fx.enabled;
   const dismiss = () => {
-    localStorage.setItem("p2s.fxHint", "1");
+    flagWrite("p2s.fxHint");
     force();
   };
   return (
@@ -99,7 +117,7 @@ function IntroCard() {
   const [, force] = useReducer((x: number) => x + 1, 0);
   const seen = useSyncExternalStore(
     noopSub,
-    () => localStorage.getItem("p2s.intro") === "1",
+    () => flagSeen("p2s.intro"),
     () => true,
   );
   if (seen) return null;
@@ -111,7 +129,7 @@ function IntroCard() {
       <button
         type="button"
         onClick={() => {
-          localStorage.setItem("p2s.intro", "1");
+          flagWrite("p2s.intro");
           force();
         }}
         aria-label="Dismiss introduction"

@@ -43,6 +43,17 @@ describe("intro gate", () => {
     expect(shouldShowIntro(mapStorage(), ss)).toBe(false);
   });
 
+  it("does not count a freshly-persisted initial state as resumable", () => {
+    const ss = mapStorage({
+      [STORAGE_KEY]: JSON.stringify({
+        tick: 0,
+        visualStepIndex: -1,
+        phase: "visualize",
+      }),
+    });
+    expect(hasSavedSim(ss)).toBe(false);
+  });
+
   it("ignores a corrupt saved sim blob", () => {
     const ss = mapStorage({ [STORAGE_KEY]: "{not json" });
     expect(hasSavedSim(ss)).toBe(false);

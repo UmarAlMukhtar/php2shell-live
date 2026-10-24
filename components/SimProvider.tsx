@@ -24,6 +24,16 @@ interface SimContextValue {
 
 const SimContext = createContext<SimContextValue | null>(null);
 
+/** Accessing the storage global itself can throw (blocked storage →
+ *  SecurityError) — resolve it once inside a guard. */
+function safeSessionStorage(): Storage | null {
+  try {
+    return sessionStorage;
+  } catch {
+    return null;
+  }
+}
+
 /**
  * Shared simulation store: one engine state drives Visualize, Defend and
  * Verify. Persisted to sessionStorage so a refresh recovers the incident.
@@ -36,9 +46,7 @@ export function SimProvider({ children }: { children: ReactNode }) {
   // the first render paints, and strictly before any save below.
   useEffect(() => {
     const t = setTimeout(() => {
-      const saved = readSavedSim(
-        typeof sessionStorage === "undefined" ? null : sessionStorage,
-      );
+      const saved = readSavedSim(safeSessionStorage());
       if (saved) dispatch({ type: "HYDRATE", state: saved });
       setHydrated(true);
     }, 0);
@@ -50,10 +58,7 @@ export function SimProvider({ children }: { children: ReactNode }) {
   // report persists too, so refresh restores PATCHED/failed outcomes.
   useEffect(() => {
     if (!hydrated) return;
-    writeSavedSim(
-      typeof sessionStorage === "undefined" ? null : sessionStorage,
-      state,
-    );
+    writeSavedSim(safeSessionStorage(), state);
   }, [state, hydrated]);
 
   // Attacker ticks forward while defending.

@@ -10,7 +10,7 @@ import {
   useSyncExternalStore,
   type ReactNode,
 } from "react";
-import { shouldShowIntro } from "@/lib/ui/introGate";
+import { markIntroSeen, shouldShowIntro } from "@/lib/ui/introGate";
 import { FirstVisitIntro } from "./FirstVisitIntro";
 
 interface IntroGateValue {
@@ -28,10 +28,13 @@ export function useIntroGate(): IntroGateValue {
 const noopSub = () => () => {};
 
 function readBypass(): boolean {
-  return !shouldShowIntro(
-    typeof localStorage === "undefined" ? null : localStorage,
-    typeof sessionStorage === "undefined" ? null : sessionStorage,
-  );
+  // Even *accessing* the storage globals can throw (blocked storage →
+  // SecurityError) — must not escape the snapshot or React unmounts.
+  try {
+    return !shouldShowIntro(localStorage, sessionStorage);
+  } catch {
+    return true;
+  }
 }
 
 /** First-visit intro gate: mounts the dialog as a sibling of the page
@@ -52,9 +55,19 @@ export function IntroGate({ children }: { children: ReactNode }) {
   }, [gateOpen]);
 
   const finish = useCallback(() => {
+    try {
+      markIntroSeen(localStorage);
+    } catch {
+      // non-fatal
+    }
     setDone(true);
-    document.getElementById("dashboard-title")?.focus();
   }, []);
+
+  // Focus returns to the dashboard heading only after the inert wrapper is
+  // removed (post-commit) — focusing earlier silently no-ops.
+  useEffect(() => {
+    if (done) document.getElementById("dashboard-title")?.focus();
+  }, [done]);
 
   return (
     <IntroGateContext.Provider value={{ gateOpen }}>
