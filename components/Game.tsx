@@ -1,6 +1,7 @@
 "use client";
 
 import { TARGET_PATCH_VERSION, CVE } from "@/lib/sim/cve";
+import { useReducer, useSyncExternalStore } from "react";
 import { useSim } from "./SimProvider";
 import Link from "next/link";
 import { BreachEffect } from "./BreachEffect";
@@ -11,6 +12,8 @@ import { VersionBadge } from "./VersionBadge";
 import { VisualizeView } from "./VisualizeView";
 import { ForensicsPanel } from "./forensics/ForensicsPanel";
 import { ForensicsProvider, useForensics } from "./forensics/ForensicsProvider";
+
+const noopSub = () => () => {};
 
 const PHASES = ["visualize", "defend", "verify"] as const;
 const PHASE_LABELS: Record<(typeof PHASES)[number], string> = {
@@ -34,20 +37,91 @@ export function Game() {
 
 function ForensicsToggle() {
   const fx = useForensics();
+  const [, force] = useReducer((x: number) => x + 1, 0);
+  const hintSeen = useSyncExternalStore(
+    noopSub,
+    () => localStorage.getItem("p2s.fxHint") === "1",
+    () => true,
+  );
   if (!fx) return null;
+  const showHint = !hintSeen && !fx.enabled;
+  const dismiss = () => {
+    localStorage.setItem("p2s.fxHint", "1");
+    force();
+  };
   return (
-    <button
-      type="button"
-      onClick={fx.toggle}
-      aria-pressed={fx.enabled}
-      className={`rounded border px-3 py-1.5 font-mono text-[10px] font-bold tracking-widest uppercase transition-colors ${
-        fx.enabled
-          ? "border-cyan/60 bg-cyan/15 text-cyan"
-          : "border-cyan/30 bg-cyan/5 text-cyan/70 hover:bg-cyan/10"
-      }`}
+    <span className="relative">
+      <button
+        type="button"
+        onClick={() => {
+          dismiss();
+          fx.toggle();
+        }}
+        aria-pressed={fx.enabled}
+        aria-expanded={fx.enabled}
+        aria-controls="forensics-panel"
+        className={`rounded border px-3 py-1.5 font-mono text-[10px] font-bold tracking-widest uppercase transition-colors ${
+          fx.enabled
+            ? "border-cyan/60 bg-cyan/15 text-cyan"
+            : "border-cyan/30 bg-cyan/5 text-cyan/70 hover:bg-cyan/10"
+        }`}
+      >
+        ◎ forensics
+      </button>
+      {showHint ? (
+        <span
+          role="status"
+          className="glass absolute top-full right-0 z-20 mt-2 flex w-56 items-start gap-2 p-2 font-mono text-[10px] leading-4 normal-case tracking-normal text-cyan"
+        >
+          <span className="flex-1">
+            New: <strong>FORENSICS</strong> — inspect every allocation, replay the
+            exploit vs the patched runtime, and check model invariants.
+          </span>
+          <button
+            type="button"
+            onClick={dismiss}
+            aria-label="Dismiss forensics hint"
+            className="text-muted hover:text-foreground"
+          >
+            ✕
+          </button>
+        </span>
+      ) : null}
+    </span>
+  );
+}
+
+/** One-time primer: what the visitor is about to watch. */
+function IntroCard() {
+  const [, force] = useReducer((x: number) => x + 1, 0);
+  const seen = useSyncExternalStore(
+    noopSub,
+    () => localStorage.getItem("p2s.intro") === "1",
+    () => true,
+  );
+  if (seen) return null;
+  return (
+    <aside
+      aria-label="What you are about to see"
+      className="glass border-cyan/30 p-3 font-mono text-[11px] leading-5 text-foreground/80"
     >
-      ◎ forensics
-    </button>
+      <button
+        type="button"
+        onClick={() => {
+          localStorage.setItem("p2s.intro", "1");
+          force();
+        }}
+        aria-label="Dismiss introduction"
+        className="float-right text-muted hover:text-foreground"
+      >
+        ✕
+      </button>
+      <span className="text-cyan">CVE-2026-109619 in one line:</span> a PHP
+      worker&rsquo;s global-state pointer survives an aborted request and keeps
+      aiming at freed heap — the next request re-issues that slot, and the
+      stale pointer now reads attacker-influenced memory. Watch it happen
+      below, then stop it.
+    </aside>
   );
 }
 
@@ -121,6 +195,7 @@ function GameInner() {
       </div>
 
       <main className="min-h-0 flex-1">
+        {state.phase === "visualize" ? <IntroCard /> : null}
         {state.phase === "visualize" ? <VisualizeView /> : null}
         {state.phase === "defend" ? <DefendView /> : null}
         {state.phase === "report" || state.phase === "verify" ? <ReportView /> : null}

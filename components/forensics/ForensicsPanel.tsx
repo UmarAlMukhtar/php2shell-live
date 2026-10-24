@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useSim } from "@/components/SimProvider";
 import { useForensics } from "./ForensicsProvider";
 import { heapInvariants, refIsStale, staleReason } from "@/lib/sim/invariants";
@@ -175,12 +175,13 @@ function DiffReplay() {
         the engine under two runtime configs. Not an execution of real PHP
         binaries and not a claim of real-world exploitability.
       </p>
-      <div className="flex items-center gap-2 overflow-x-auto" role="tablist" aria-label="Replay step">
+      <div className="flex items-center gap-2 overflow-x-auto" role="group" aria-label="Replay step">
         {diff.a.frames.map((f, i) => (
           <button
             key={i}
             type="button"
             onClick={() => setFrame(i)}
+            aria-current={i === frame ? "step" : undefined}
             className={`glass shrink-0 px-2 py-1 font-mono text-[9px] tracking-wider uppercase ${
               i === frame ? "border-cyan text-cyan" : "text-muted"
             } ${i === diff.divergence ? "outline outline-1 outline-warn" : ""}`}
@@ -265,19 +266,59 @@ function Checks({ state }: { state: SimState }) {
 /** X-RAY drawer: inspector, execution trace, A/B replay, validation checks. */
 export function ForensicsPanel() {
   const { state } = useSim();
+  const fx = useForensics();
   const [tab, setTab] = useState<Tab>("inspect");
+  const tabRefs = useRef<Array<HTMLButtonElement | null>>([]);
+
+  // Roving tabindex + arrow-key navigation per the ARIA tabs pattern.
+  const onTabKeyDown = (e: React.KeyboardEvent, i: number) => {
+    const n = TABS.length;
+    let next = -1;
+    if (e.key === "ArrowRight") next = (i + 1) % n;
+    else if (e.key === "ArrowLeft") next = (i - 1 + n) % n;
+    else if (e.key === "Home") next = 0;
+    else if (e.key === "End") next = n - 1;
+    if (next >= 0) {
+      e.preventDefault();
+      setTab(TABS[next]!.id);
+      tabRefs.current[next]?.focus();
+    }
+  };
+
+  // Polite announcement of inspector selection + violations.
+  const sel = fx?.selectedBlock ?? null;
+  const selBlock = sel != null ? state.heap[sel] : undefined;
+  const announcement = selBlock
+    ? `blk#${selBlock.id} selected — ${selBlock.state}${
+        state.refs.some((r) => r.targetId === selBlock.id && refIsStale(r, selBlock))
+          ? ", violation: dangling reference"
+          : ""
+      }`
+    : "";
 
   return (
-    <section aria-label="Forensics console" className="glass mt-4 p-3">
-      <div className="mb-3 flex flex-wrap items-center gap-2" role="tablist" aria-label="Forensics tools">
+    <section aria-label="Forensics console" id="forensics-panel" className="glass mt-4 p-3">
+      <p className="sr-only" aria-live="polite">{announcement}</p>
+      <div
+        className="sticky top-2 z-10 -mx-3 mb-3 flex flex-wrap items-center gap-2 bg-panel/95 px-3 py-1 backdrop-blur"
+        role="tablist"
+        aria-label="Forensics tools"
+      >
         <span className="holo-title mr-2 font-mono text-[11px] tracking-[0.25em] uppercase">forensics</span>
-        {TABS.map((t) => (
+        {TABS.map((t, i) => (
           <button
             key={t.id}
             type="button"
             role="tab"
+            id={`fx-tab-${t.id}`}
             aria-selected={tab === t.id}
+            aria-controls={`fx-panel-${t.id}`}
+            tabIndex={tab === t.id ? 0 : -1}
+            ref={(el) => {
+              tabRefs.current[i] = el;
+            }}
             onClick={() => setTab(t.id)}
+            onKeyDown={(e) => onTabKeyDown(e, i)}
             className={`px-2.5 py-1 font-mono text-[10px] tracking-widest uppercase rounded-sm border transition-colors ${
               tab === t.id
                 ? "border-cyan/60 bg-cyan/10 text-cyan"
@@ -288,10 +329,21 @@ export function ForensicsPanel() {
           </button>
         ))}
       </div>
-      {tab === "inspect" ? <Inspector state={state} /> : null}
-      {tab === "trace" ? <TraceList state={state} /> : null}
-      {tab === "diff" ? <DiffReplay /> : null}
-      {tab === "checks" ? <Checks state={state} /> : null}
+      {TABS.map((t) =>
+        tab === t.id ? (
+          <div
+            key={t.id}
+            role="tabpanel"
+            id={`fx-panel-${t.id}`}
+            aria-labelledby={`fx-tab-${t.id}`}
+          >
+            {t.id === "inspect" ? <Inspector state={state} /> : null}
+            {t.id === "trace" ? <TraceList state={state} /> : null}
+            {t.id === "diff" ? <DiffReplay /> : null}
+            {t.id === "checks" ? <Checks state={state} /> : null}
+          </div>
+        ) : null,
+      )}
     </section>
   );
 }

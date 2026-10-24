@@ -6,8 +6,11 @@ import {
   useContext,
   useMemo,
   useState,
+  useSyncExternalStore,
   type ReactNode,
 } from "react";
+
+const noopSub = () => () => {};
 
 interface ForensicsContextValue {
   /** FORENSICS mode on/off — hidden from first-time users by default. */
@@ -24,12 +27,19 @@ interface ForensicsContextValue {
 const Ctx = createContext<ForensicsContextValue | null>(null);
 
 export function ForensicsProvider({ children }: { children: ReactNode }) {
-  const [enabled, setEnabled] = useState(false);
+  const [manual, setManual] = useState(false);
+  // Deep link: /?forensics=1 opens the console directly.
+  const deepLinked = useSyncExternalStore(
+    noopSub,
+    () => new URLSearchParams(window.location.search).has("forensics"),
+    () => false,
+  );
+  const enabled = manual || deepLinked;
   const [selectedBlock, setSelectedBlock] = useState<number | null>(null);
   const [focusId, setFocusId] = useState<number | null>(null);
 
   const toggle = useCallback(() => {
-    setEnabled((e) => {
+    setManual((e) => {
       if (e) {
         setSelectedBlock(null);
         setFocusId(null);
