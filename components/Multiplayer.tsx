@@ -158,15 +158,15 @@ export function Multiplayer() {
 
   if (phase === "room") {
     return (
-      <main className="cyber-bg mx-auto flex min-h-dvh max-w-3xl flex-col items-center justify-center gap-3 p-6">
-        <p className="font-mono text-sm text-muted">Joining room…</p>
+      <main className="mx-auto flex min-h-dvh max-w-3xl flex-col items-center justify-center gap-3 p-6">
+        <p className="text-sm text-fg-muted">Joining room…</p>
         {err ? (
           <>
-            <p className="font-mono text-xs text-danger" role="alert">{err}</p>
+            <p className="text-xs text-breach" role="alert">{err}</p>
             <button
               type="button"
               onClick={leave}
-              className="rounded border border-border px-3 py-1.5 font-mono text-xs text-foreground hover:border-accent/60"
+              className="rounded-lg border border-border bg-surface-2 px-3 py-1.5 text-xs text-fg hover:border-accent/60"
             >
               Back to lobby
             </button>
@@ -177,31 +177,31 @@ export function Multiplayer() {
   }
 
   return (
-    <main className="cyber-bg mx-auto flex min-h-dvh w-full max-w-3xl flex-col gap-8 px-4 py-10">
+    <main className="mx-auto flex min-h-dvh w-full max-w-3xl flex-col gap-8 px-4 py-10">
       <header className="flex items-center justify-between">
-        <Link href="/" className="font-mono text-xs text-muted hover:text-foreground">
+        <Link href="/" className="text-xs text-fg-muted hover:text-fg">
           ← php2shell: live
         </Link>
-        <p className="font-mono text-[10px] tracking-widest text-muted uppercase">
+        <p className="text-[11px] font-semibold tracking-widest text-fg-faint uppercase">
           multiplayer — attacker vs defender
         </p>
       </header>
 
-      <section className="glass p-6">
-        <h1 className="font-mono text-lg font-bold text-foreground">
+      <section className="rounded-[10px] border border-border bg-surface-1 p-6">
+        <h1 className="text-lg font-bold text-fg">
           Incident room
         </h1>
-        <p className="mt-1 font-mono text-xs leading-5 text-muted">
+        <p className="mt-1 text-xs leading-5 text-fg-muted">
           One player drives the exploit. The other runs incident response — same
           simulation, live. Share the room code or QR.
         </p>
         <div className="mt-4 grid gap-2 sm:grid-cols-2">
-          <p className="rounded border border-danger/30 bg-danger/5 px-3 py-2 font-mono text-[10px] leading-4 text-foreground/80">
-            <span className="font-bold text-danger">ATTACKER</span> — run the
+          <p className="rounded-lg border border-attack/40 bg-attack/5 px-3 py-2 text-[11px] leading-4 text-fg">
+            <span className="font-bold text-attack">ATTACKER</span> — run the
             exploit chain: recon → probe → fatal error → heap groom → UAF →
             seize the worker. BREACH wins.
           </p>
-          <p className="rounded border border-accent/30 bg-accent/5 px-3 py-2 font-mono text-[10px] leading-4 text-foreground/80">
+          <p className="rounded-lg border border-accent/40 bg-accent/5 px-3 py-2 text-[11px] leading-4 text-fg">
             <span className="font-bold text-accent">DEFENDER</span> — inspect,
             block or slow the attack, apply the right patch, restart, verify.
             PATCHED wins.
@@ -210,7 +210,7 @@ export function Multiplayer() {
 
         <div className="mt-5 grid gap-4 sm:grid-cols-2">
           <label className="flex flex-col gap-1.5">
-            <span className="font-mono text-[10px] tracking-widest text-muted uppercase">
+            <span className="text-[11px] font-semibold tracking-widest text-fg-faint uppercase">
               Call sign
             </span>
             <input
@@ -218,11 +218,11 @@ export function Multiplayer() {
               onChange={(e) => setName(e.target.value)}
               placeholder="blue-01"
               maxLength={24}
-              className="rounded border border-border bg-panel-2 px-3 py-2 font-mono text-sm text-foreground placeholder:text-muted/50 focus:border-accent focus:outline-none"
+              className="rounded-lg border border-border bg-surface-2 px-3 py-2 font-mono text-sm text-fg placeholder:text-fg-faint/60 focus:border-accent focus:outline-none"
             />
           </label>
           <fieldset className="flex flex-col gap-1.5">
-            <legend className="font-mono text-[10px] tracking-widest text-muted uppercase">
+            <legend className="text-[11px] font-semibold tracking-widest text-fg-faint uppercase">
               Preferred role
             </legend>
             <div className="flex gap-2" role="radiogroup" aria-label="Role">
@@ -232,10 +232,10 @@ export function Multiplayer() {
                   type="button"
                   onClick={() => setRole(r)}
                   aria-pressed={role === r}
-                  className={`flex-1 rounded border px-3 py-2 font-mono text-xs uppercase tracking-wider transition-colors ${
+                  className={`flex-1 rounded-lg border px-3 py-2 text-xs font-semibold uppercase tracking-wider transition-colors ${
                     role === r
                       ? "border-accent bg-accent/15 text-accent"
-                      : "border-border bg-panel-2 text-muted hover:text-foreground"
+                      : "border-border bg-surface-2 text-fg-muted hover:text-fg"
                   }`}
                 >
                   {r}
@@ -246,17 +246,17 @@ export function Multiplayer() {
         </div>
 
         {err ? (
-          <p className="mt-3 font-mono text-xs text-danger" role="alert">
+          <p className="mt-3 text-xs text-breach" role="alert">
             {err}
           </p>
         ) : null}
 
         <div className="mt-6 grid gap-4 sm:grid-cols-2">
-          <div className="rounded border border-border/60 bg-panel-2 p-4">
-            <h2 className="font-mono text-xs font-bold tracking-widest text-foreground uppercase">
+          <div className="rounded-lg border border-border bg-surface-2 p-4">
+            <h2 className="text-xs font-bold tracking-widest text-fg uppercase">
               Host a match
             </h2>
-            <p className="mt-1 mb-3 font-mono text-[10px] text-muted">
+            <p className="mt-1 mb-3 text-[11px] text-fg-muted">
               Creates a fresh room; share the code.
             </p>
             <button
@@ -264,16 +264,16 @@ export function Multiplayer() {
               onClick={create}
               disabled={busy}
               data-testid="mp-create"
-              className="w-full rounded border border-accent bg-accent/15 px-4 py-2.5 font-mono text-xs font-bold tracking-widest text-accent uppercase hover:bg-accent/25 disabled:opacity-50"
+              className="w-full rounded-lg bg-accent px-4 py-2.5 text-xs font-bold tracking-widest text-accent-fg uppercase hover:bg-accent/85 disabled:opacity-50"
             >
               Create room
             </button>
           </div>
-          <div className="rounded border border-border/60 bg-panel-2 p-4">
-            <h2 className="font-mono text-xs font-bold tracking-widest text-foreground uppercase">
+          <div className="rounded-lg border border-border bg-surface-2 p-4">
+            <h2 className="text-xs font-bold tracking-widest text-fg uppercase">
               Join a match
             </h2>
-            <p className="mt-1 mb-3 font-mono text-[10px] text-muted">
+            <p className="mt-1 mb-3 text-[11px] text-fg-muted">
               Enter the 4-letter code or open a shared link.
             </p>
             <div className="flex gap-2">
@@ -283,14 +283,14 @@ export function Multiplayer() {
                 placeholder="CODE"
                 maxLength={4}
                 aria-label="Room code"
-                className="w-24 rounded border border-border bg-panel px-3 py-2.5 text-center font-mono text-sm tracking-[0.3em] text-foreground uppercase placeholder:text-muted/50 focus:border-accent focus:outline-none"
+                className="w-24 rounded-lg border border-border bg-surface-1 px-3 py-2.5 text-center font-mono text-sm tracking-[0.3em] text-fg uppercase placeholder:text-fg-faint/60 focus:border-accent focus:outline-none"
               />
               <button
                 type="button"
                 onClick={join}
                 disabled={busy}
                 data-testid="mp-join"
-                className="flex-1 rounded border border-border bg-panel px-4 py-2.5 font-mono text-xs font-bold tracking-widest text-foreground uppercase hover:border-accent/60 disabled:opacity-50"
+                className="flex-1 rounded-lg border border-border bg-surface-1 px-4 py-2.5 text-xs font-bold tracking-widest text-fg uppercase hover:border-accent/60 disabled:opacity-50"
               >
                 Join
               </button>

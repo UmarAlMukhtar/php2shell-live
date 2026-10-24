@@ -14,12 +14,12 @@ export function BreachEffect({ active }: Props) {
       {active ? (
         <motion.div
           key="breach"
-          className="pointer-events-none fixed inset-0 z-40 border-4 border-danger"
+          className="pointer-events-none fixed inset-0 z-40 border-2 border-breach/70 bg-breach/10"
           initial={{ opacity: 0 }}
           animate={
             reduced
-              ? { opacity: 0.6 }
-              : { opacity: [0, 0.75, 0.35, 0.65, 0.4] }
+              ? { opacity: 0.5 }
+              : { opacity: [0, 0.6, 0.3, 0.5, 0.35] }
           }
           exit={{ opacity: 0 }}
           transition={{ duration: reduced ? 0.2 : 1.6 }}

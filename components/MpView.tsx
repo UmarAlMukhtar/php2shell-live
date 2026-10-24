@@ -47,29 +47,29 @@ export function MpView({
   const report = state.report;
 
   return (
-    <main className="cyber-bg mx-auto flex min-h-dvh w-full max-w-7xl flex-col gap-4 px-4 py-6">
+    <main className="mx-auto flex min-h-dvh w-full max-w-7xl flex-col gap-4 px-4 py-6">
       <BreachEffect active={state.status === "BREACHED"} />
 
-      <header className="flex flex-wrap items-center gap-x-4 gap-y-2">
-        <span className="font-mono text-[10px] tracking-widest text-muted uppercase">
+      <header className="flex flex-wrap items-center gap-x-4 gap-y-2 rounded-[10px] border border-border bg-surface-1 px-3 py-2">
+        <span className="text-[11px] font-semibold tracking-widest text-fg-faint uppercase">
           room
         </span>
         <span
-          className="rounded border border-accent/50 bg-accent/10 px-2 py-0.5 font-mono text-sm font-bold tracking-[0.3em] text-accent"
+          className="rounded-md border border-accent/50 bg-accent/10 px-2 py-0.5 font-mono text-sm font-bold tracking-[0.3em] text-accent"
           data-testid="mp-room-code"
         >
           {room.code}
         </span>
         {qrUrl ? (
           <details className="group">
-            <summary className="cursor-pointer list-none font-mono text-[10px] text-muted hover:text-foreground">
-              [qr]
+            <summary className="cursor-pointer list-none text-[11px] text-fg-faint hover:text-fg">
+              qr
             </summary>
             {/* eslint-disable-next-line @next/next/no-img-element -- QR is a local data URL */}
             <img
               src={qrUrl}
               alt={`QR code linking to room ${room.code}`}
-              className="absolute z-20 mt-2 rounded border border-border bg-panel p-2"
+              className="absolute z-20 mt-2 rounded-lg border border-border bg-surface-1 p-2"
               width={160}
               height={160}
             />
@@ -78,25 +78,25 @@ export function MpView({
         <button
           type="button"
           onClick={() => navigator.clipboard?.writeText(`${location.origin}/play?code=${room.code}`)}
-          className="font-mono text-[10px] text-muted hover:text-foreground"
+          className="text-[11px] text-fg-faint hover:text-fg"
         >
-          [copy link]
+          copy link
         </button>
-        <span className="flex items-center gap-1.5 font-mono text-[10px] text-muted" data-testid="mp-conn">
+        <span className="flex items-center gap-1.5 font-mono text-[11px] text-fg-muted" data-testid="mp-conn">
           <span
             className={`inline-block h-1.5 w-1.5 rounded-full ${
-              conn === "live" ? "bg-accent" : conn === "polling" ? "bg-warn" : "bg-danger"
+              conn === "live" ? "bg-accent" : conn === "polling" ? "bg-vuln" : "bg-breach"
             }`}
           />
           {CONN_LABEL[conn]}
         </span>
-        <span className="font-mono text-[10px] text-muted" data-testid="mp-players">
+        <span className="font-mono text-[11px] text-fg-muted" data-testid="mp-players">
           {room.players.map((p) => `${p.name}·${p.role.slice(0, 3)}${p.connected ? "" : "✕"}`).join("  ")}
         </span>
         <span className="ml-auto flex items-center gap-3">
           <span
-            className={`font-mono text-[10px] tracking-widest uppercase ${
-              role === "attacker" ? "text-magenta" : role === "defender" ? "text-cyan" : "text-purple"
+            className={`text-[11px] font-semibold tracking-widest uppercase ${
+              role === "attacker" ? "text-attack" : role === "defender" ? "text-accent" : "text-contained"
             }`}
           >
             you: {role}
@@ -104,9 +104,9 @@ export function MpView({
           <button
             type="button"
             onClick={onLeave}
-            className="font-mono text-[10px] text-muted hover:text-foreground"
+            className="text-[11px] text-fg-faint hover:text-fg"
           >
-            [leave]
+            leave
           </button>
         </span>
       </header>
@@ -119,16 +119,16 @@ export function MpView({
 
       {error ? (
         <div
-          className="glass glass-danger flex items-center justify-between px-3 py-2"
+          className="flex items-center justify-between rounded-[10px] border border-breach/50 bg-breach/10 px-3 py-2"
           role="alert"
         >
-          <p className="font-mono text-xs text-danger">{error}</p>
+          <p className="text-xs text-breach">{error}</p>
           <button
             type="button"
             onClick={onDismissError}
-            className="font-mono text-[10px] text-muted hover:text-foreground"
+            className="text-[11px] text-fg-faint hover:text-fg"
           >
-            [dismiss]
+            dismiss
           </button>
         </div>
       ) : null}
@@ -143,14 +143,15 @@ export function MpView({
         <div className="grid gap-4 lg:grid-cols-[280px_1.3fr_1fr]">
           <aside className="flex min-w-0 flex-col gap-4">
             <section
-              className={`glass p-3 ${role === "attacker" ? "glass-danger" : ""}`}
-              style={
-                role === "spectator"
-                  ? { borderColor: "rgb(167 139 250 / 0.3)" }
-                  : undefined
-              }
+              className={`rounded-[10px] border bg-surface-1 p-3 ${
+                role === "attacker"
+                  ? "border-attack/50"
+                  : role === "spectator"
+                    ? "border-contained/40"
+                    : "border-border"
+              }`}
             >
-              <h2 className="mb-2 font-mono text-xs tracking-widest text-muted uppercase">
+              <h2 className="mb-2 text-xs font-semibold tracking-widest text-fg-muted uppercase">
                 {role === "attacker"
                   ? "Attack moves"
                   : role === "defender"
@@ -168,7 +169,7 @@ export function MpView({
                   onAction={(id) => void onAct({ kind: "defend", id })}
                 />
               ) : (
-                <p className="px-1 py-2 font-mono text-xs leading-5 text-muted">
+                <p className="px-1 py-2 text-xs leading-5 text-fg-muted">
                   Both seats are taken — watching live. If a player drops, rejoin
                   to take the seat.
                 </p>
@@ -179,7 +180,7 @@ export function MpView({
                 <button
                   type="button"
                   onClick={() => void onAct({ kind: "reset" })}
-                  className="rounded border border-border bg-panel-2 px-3 py-2 font-mono text-[10px] tracking-widest text-muted uppercase hover:border-foreground/40 hover:text-foreground"
+                  className="rounded-lg border border-border bg-surface-2 px-3 py-2 text-[11px] font-semibold tracking-widest text-fg-muted uppercase hover:border-fg-faint/40 hover:text-fg"
                   data-testid="mp-reset"
                 >
                   ⟲ reset incident
@@ -187,23 +188,23 @@ export function MpView({
                 <button
                   type="button"
                   onClick={() => void onAct({ kind: "verify" })}
-                  className={`rounded border px-4 py-3 font-mono text-sm font-bold tracking-widest transition-colors focus-visible:outline-2 ${
+                  className={`rounded-lg border px-4 py-3 text-sm font-bold tracking-widest transition-colors focus-visible:outline-2 ${
                     patchLive
-                      ? "border-accent bg-accent/15 text-accent hover:bg-accent/25 focus-visible:outline-accent"
-                      : "border-border bg-panel-2 text-muted hover:border-foreground/40 focus-visible:outline-foreground"
+                      ? "border-accent bg-accent text-accent-fg hover:bg-accent/85 focus-visible:outline-accent"
+                      : "border-border bg-surface-2 text-fg-faint hover:border-fg-faint focus-visible:outline-fg"
                   }`}
                   data-testid="mp-verify"
                 >
                   VERIFY REMEDIATION →
                 </button>
-                <p className="font-mono text-[10px] leading-4 text-muted">
+                <p className="text-[11px] leading-4 text-fg-faint">
                   {patchLive
                     ? "patched build is live — replay the attack to confirm."
                     : "replays the modeled attack. Without a live patch it will succeed."}
                 </p>
               </>
             ) : (
-              <p className="font-mono text-[10px] leading-4 text-muted">
+              <p className="text-[11px] leading-4 text-fg-faint">
                 Goal: reach BREACH before they patch. Blocked? Rotate source.
                 Patch live? You&rsquo;re deflected — the defender wins on verify.
               </p>
@@ -223,12 +224,12 @@ export function MpView({
                   ?.id ?? null
               }
             />
-            <div className="glass min-h-[240px] flex-1 overflow-hidden">
+            <div className="min-h-[240px] flex-1 overflow-hidden rounded-[10px] border border-border bg-surface-3">
               <Terminal lines={state.term} className="h-full" />
             </div>
           </div>
 
-          <div className="glass">
+          <div className="rounded-[10px] border border-border bg-surface-3">
             <LogStream logs={state.logs} />
           </div>
         </div>
