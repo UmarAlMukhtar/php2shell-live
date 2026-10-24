@@ -26,18 +26,18 @@ export function StageInspector({ currentIndex, onJump }: Props) {
             type="button"
             onClick={() => idx >= 0 && onJump(idx)}
             disabled={idx < 0}
-            className={`flex items-center gap-2 rounded border px-2.5 py-2 text-left font-mono text-[11px] transition-colors focus-visible:outline-2 focus-visible:outline-accent ${
+            className={`flex items-center gap-2 rounded-lg border px-2.5 py-2 text-left text-xs transition-colors focus-visible:outline-2 focus-visible:outline-accent ${
               active
                 ? "border-accent/70 bg-accent/10 text-accent"
                 : done
-                  ? "border-border bg-panel-2 text-foreground/70 hover:border-accent/40"
-                  : "border-border/60 bg-transparent text-muted hover:border-border"
+                  ? "border-border bg-surface-2 text-fg-muted hover:border-accent/40"
+                  : "border-border/60 bg-transparent text-fg-faint hover:border-border"
             }`}
             aria-current={active ? "step" : undefined}
           >
             <span
-              className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-full border text-[9px] ${
-                active ? "border-accent text-accent" : done ? "border-accent/50 text-accent/70" : "border-muted/50"
+              className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-full border font-mono text-[9px] ${
+                active ? "border-accent text-accent" : done ? "border-accent/50 text-accent/70" : "border-fg-faint/50"
               }`}
             >
               {done ? "✓" : stage + 1}

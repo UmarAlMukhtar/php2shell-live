@@ -10,6 +10,7 @@ import { Terminal } from "./Terminal";
 import { StageInspector } from "./StageInspector";
 import { StageExplanation } from "./StageExplanation";
 import { PlaybackControls } from "./PlaybackControls";
+import { EvidenceSection } from "./EvidenceSection";
 
 const STEP_MS = 3400;
 
@@ -64,10 +65,10 @@ export function VisualizeView() {
     <div className="flex flex-col gap-4">
       <div className="grid gap-4 lg:grid-cols-[220px_1.3fr_1fr]">
         <aside className="order-2 min-w-0 lg:order-1">
-          <div className="glass p-3">
+          <div className="rounded-[10px] border border-border bg-surface-1 p-3">
             <StageInspector currentIndex={idx} onJump={jumpTo} />
           </div>
-          <div className="glass mt-3 p-3">
+          <div className="mt-3 rounded-[10px] border border-border bg-surface-1 p-3">
             <PlaybackControls
               playing={playing}
               atEnd={atEnd}
@@ -105,13 +106,15 @@ export function VisualizeView() {
           )}
         </div>
 
-        <div className="order-3 flex min-h-[280px] min-w-0 flex-col gap-4 lg:order-3">
-          <div className="glass min-h-[220px] flex-1 overflow-hidden">
-            <Terminal lines={state.term} className="h-full" />
-          </div>
-          <div className="glass">
-            <LogStream logs={state.logs} />
-          </div>
+        <div className="order-3 flex min-w-0 flex-col gap-4 lg:order-3">
+          <EvidenceSection title="Simulated terminal" className="min-h-[220px]">
+            <Terminal lines={state.term} className="h-full min-h-[220px]" />
+          </EvidenceSection>
+          <EvidenceSection title="Security logs">
+            <div className="max-h-64 overflow-hidden">
+              <LogStream logs={state.logs} />
+            </div>
+          </EvidenceSection>
         </div>
       </div>
 
@@ -119,19 +122,19 @@ export function VisualizeView() {
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          className="glass glass-danger p-5 text-center"
+          className="rounded-[10px] border border-b-2 border-border border-b-breach bg-surface-1 p-5 text-center"
         >
-          <p className="font-mono text-lg font-bold tracking-wider text-danger">
+          <p className="text-lg font-bold tracking-wide text-breach">
             You watched it happen. Now stop it.
           </p>
-          <p className="mx-auto mt-1 max-w-lg text-sm text-foreground/80">
+          <p className="mx-auto mt-1 max-w-lg text-sm text-fg-muted">
             Take over the incident: identify the vulnerability, contain the attacker,
             patch the runtime correctly, then verify the fix by replaying the attack.
           </p>
           <button
             type="button"
             onClick={enterDefend}
-            className="mt-4 rounded border border-danger bg-danger/15 px-6 py-2.5 font-mono text-sm font-bold tracking-widest text-danger transition-colors hover:bg-danger/25 focus-visible:outline-2 focus-visible:outline-danger"
+            className="mt-4 rounded-lg bg-accent px-6 py-2.5 text-sm font-bold tracking-widest text-accent-fg transition-colors hover:bg-accent/85 focus-visible:outline-2 focus-visible:outline-accent"
             data-testid="enter-defend"
           >
             ENTER INCIDENT RESPONSE →

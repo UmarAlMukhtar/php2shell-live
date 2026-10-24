@@ -11,7 +11,7 @@ interface Props {
 }
 
 const BTN =
-  "rounded border border-border bg-panel-2 px-3 py-1.5 font-mono text-xs text-foreground/90 transition-colors hover:border-accent/60 hover:text-accent focus-visible:outline-2 focus-visible:outline-accent disabled:opacity-40 disabled:hover:border-border disabled:hover:text-foreground/90";
+  "rounded-lg border border-border bg-surface-2 px-3 py-1.5 text-xs font-semibold text-fg transition-colors hover:border-accent/60 hover:text-accent focus-visible:outline-2 focus-visible:outline-accent disabled:opacity-40 disabled:hover:border-border disabled:hover:text-fg";
 
 export function PlaybackControls({ playing, atEnd, onPause, onResume, onRestart, onSkip }: Props) {
   return (

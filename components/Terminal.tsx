@@ -50,10 +50,10 @@ export function Terminal({ lines, className }: Props) {
         fontSize: 12,
         lineHeight: 1.25,
         theme: {
-          background: "#060809",
-          foreground: "#d7e0dd",
-          cursor: "#060809",
-          selectionBackground: "#1c2a2c",
+          background: "#1e2530",
+          foreground: "#e6ebf2",
+          cursor: "#1e2530",
+          selectionBackground: "#26303e",
         },
       });
       const fit = new FitAddon();
@@ -99,7 +99,7 @@ export function Terminal({ lines, className }: Props) {
   return (
     <div
       ref={hostRef}
-      className={`${className ?? ""} min-w-0 overflow-hidden`}
+      className={`${className ?? ""} min-w-0 overflow-hidden bg-surface-3`}
       role="log"
       aria-label="Simulated terminal output"
       data-testid="terminal"
