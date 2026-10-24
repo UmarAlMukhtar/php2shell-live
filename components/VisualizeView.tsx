@@ -14,7 +14,7 @@ import { PlaybackControls } from "./PlaybackControls";
 const STEP_MS = 3400;
 
 export function VisualizeView() {
-  const { state, dispatch } = useSim();
+  const { state, hydrated, dispatch } = useSim();
   const [playing, setPlaying] = useState(true);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -29,32 +29,18 @@ export function VisualizeView() {
     }
   }, []);
 
-  const advance = useCallback(() => {
-    dispatch({
-      type: "VISUAL_STEP",
-      index: idx + 1,
-      step: VISUAL_TIMELINE[idx + 1]!,
-    });
-  }, [dispatch, idx]);
-
-  // Auto-play driver.
+  // Auto-play driver — functional VISUAL_NEXT so a re-hydrated state can
+  // never be overwritten by a stale step index.
   useEffect(() => {
-    if (!playing || atEnd) return;
-    timerRef.current = setTimeout(advance, STEP_MS);
+    if (!hydrated || !playing || atEnd) return;
+    timerRef.current = setTimeout(() => dispatch({ type: "VISUAL_NEXT" }), STEP_MS);
     return clearTimer;
-  }, [playing, atEnd, advance, clearTimer]);
+  }, [hydrated, playing, atEnd, idx, clearTimer, dispatch]);
 
   const jumpTo = useCallback(
     (index: number) => {
       clearTimer();
-      // Rebuild state by replaying steps 0..index from scratch.
-      dispatch({ type: "RESET" });
-      // RESET is async through the reducer; apply steps on next paint.
-      requestAnimationFrame(() => {
-        for (let i = 0; i <= index; i++) {
-          dispatch({ type: "VISUAL_STEP", index: i, step: VISUAL_TIMELINE[i]! });
-        }
-      });
+      dispatch({ type: "VISUAL_GOTO", index });
       setPlaying(false);
     },
     [clearTimer, dispatch],
@@ -62,10 +48,7 @@ export function VisualizeView() {
 
   const restart = useCallback(() => {
     clearTimer();
-    dispatch({ type: "RESET" });
-    requestAnimationFrame(() => {
-      dispatch({ type: "VISUAL_STEP", index: 0, step: VISUAL_TIMELINE[0]! });
-    });
+    dispatch({ type: "VISUAL_RESTART" });
     setPlaying(true);
   }, [clearTimer, dispatch]);
 

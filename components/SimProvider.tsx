@@ -6,19 +6,21 @@ import {
   useEffect,
   useMemo,
   useReducer,
+  useState,
   type ReactNode,
 } from "react";
 import { initialState } from "@/lib/sim/engine";
-import { reduce } from "@/lib/sim/reducer";
+import { reduce, type GameAction } from "@/lib/sim/reducer";
 import type { SimState } from "@/lib/sim/types";
-import type { SimAction } from "@/lib/sim/engine";
 
 const STORAGE_KEY = "php2shell.sim.v1";
 const TICK_MS = 1100;
 
 interface SimContextValue {
   state: SimState;
-  dispatch: React.Dispatch<SimAction | { type: "VERIFY" }>;
+  /** False until sessionStorage hydration has run — blocks auto-play races. */
+  hydrated: boolean;
+  dispatch: React.Dispatch<GameAction>;
 }
 
 const SimContext = createContext<SimContextValue | null>(null);
@@ -29,6 +31,7 @@ const SimContext = createContext<SimContextValue | null>(null);
  */
 export function SimProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(reduce, undefined, initialState);
+  const [hydrated, setHydrated] = useState(false);
 
   // Refresh recovery — hydrate once on mount (client-only).
   useEffect(() => {
@@ -43,6 +46,7 @@ export function SimProvider({ children }: { children: ReactNode }) {
     } catch {
       // Corrupt/absent storage → fresh state, which is fine.
     }
+    setHydrated(true);
   }, []);
 
   useEffect(() => {
@@ -60,7 +64,7 @@ export function SimProvider({ children }: { children: ReactNode }) {
     return () => clearInterval(id);
   }, [state.phase]);
 
-  const value = useMemo(() => ({ state, dispatch }), [state]);
+  const value = useMemo(() => ({ state, hydrated, dispatch }), [state, hydrated]);
   return <SimContext.Provider value={value}>{children}</SimContext.Provider>;
 }
 

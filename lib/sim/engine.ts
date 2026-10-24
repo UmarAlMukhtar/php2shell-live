@@ -252,6 +252,9 @@ export interface ActionGate {
 export type SimAction =
   | { type: "TICK" }
   | { type: "VISUAL_STEP"; index: number; step: VisualStep }
+  | { type: "VISUAL_NEXT" }
+  | { type: "VISUAL_GOTO"; index: number }
+  | { type: "VISUAL_RESTART" }
   | { type: "DEFEND"; action: DefenderActionId }
   | { type: "SET_PHASE"; phase: SimState["phase"] }
   | { type: "RESET" }
