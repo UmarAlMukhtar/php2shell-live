@@ -39,8 +39,8 @@ Real-time attacker-vs-defender rooms on top of the same simulation engine:
 - Refresh recovery via sessionStorage identity; a dropped player's seat
   frees up after the presence window.
 - Room state lives in an in-memory store locally and Upstash Redis on
-  Vercel (`UPSTASH_REDIS_REST_URL`/`UPSTASH_REDIS_REST_TOKEN`), so players
-  on different function instances stay in sync.
+  Vercel (`KV_REST_API_URL`/`KV_REST_API_TOKEN`, injected by the Upstash
+  integration), so players on different function instances stay in sync.
 
 ## Getting started
 

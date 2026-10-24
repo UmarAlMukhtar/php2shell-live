@@ -64,7 +64,7 @@ class RedisRoomStore implements RoomStore {
 
   private async client() {
     const { Redis } = await import("@upstash/redis");
-    return Redis.fromEnv();
+    return new Redis({ url: redisUrl(), token: redisToken() });
   }
 
   async get(code: string): Promise<Room | null> {
@@ -110,14 +110,22 @@ class RedisRoomStore implements RoomStore {
   }
 }
 
+/** Vercel's Upstash integration injects KV_REST_API_*; native vars also work. */
+function redisUrl() {
+  return process.env.UPSTASH_REDIS_REST_URL ?? process.env.KV_REST_API_URL ?? "";
+}
+
+function redisToken() {
+  return (
+    process.env.UPSTASH_REDIS_REST_TOKEN ?? process.env.KV_REST_API_TOKEN ?? ""
+  );
+}
+
 let store: RoomStore | null = null;
 
 export function getRoomStore(): RoomStore {
   if (!store) {
-    store =
-      process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN
-        ? new RedisRoomStore()
-        : new MemoryRoomStore();
+    store = redisUrl() && redisToken() ? new RedisRoomStore() : new MemoryRoomStore();
   }
   return store;
 }
