@@ -24,16 +24,24 @@ interface Props {
   /** Block id the guided camera should emphasize (autoplay stages), or null. */
   focusId?: number | null;
   reducedMotion: boolean;
+  /** Controlled selection (FORENSICS); omit for internal toggle behavior. */
+  selectedId?: number | null;
+  onSelect?: (id: number | null) => void;
 }
 
 /** Interactive 3D Zend-heap arena — centerpiece of the command deck. */
-export function HeapScene3D({ heap, focusId = null, reducedMotion }: Props) {
-  const [selectedId, setSelectedId] = useState<number | null>(null);
+export function HeapScene3D({ heap, focusId = null, reducedMotion, selectedId: controlled, onSelect: onSelectProp }: Props) {
+  const [internal, setInternal] = useState<number | null>(null);
   const [resetTick, setResetTick] = useState(0);
 
+  const selectedId = onSelectProp ? (controlled ?? null) : internal;
   const onSelect = useCallback(
-    (id: number) => setSelectedId((cur) => (cur === id ? null : id)),
-    [],
+    (id: number) => {
+      const next = id < 0 ? null : selectedId === id ? null : id;
+      if (onSelectProp) onSelectProp(next);
+      else setInternal(next);
+    },
+    [onSelectProp, selectedId],
   );
 
   const links = useMemo(
@@ -58,7 +66,7 @@ export function HeapScene3D({ heap, focusId = null, reducedMotion }: Props) {
         camera={{ position: [4.5, 4.2, 7.5], fov: 42 }}
         dpr={[1, 1.8]}
         gl={{ antialias: true, alpha: true }}
-        onPointerMissed={() => setSelectedId(null)}
+        onPointerMissed={() => onSelect(-1)}
       >
         <ambientLight intensity={0.35} />
         <pointLight position={[6, 8, 6]} intensity={70} color="#67e8f9" />

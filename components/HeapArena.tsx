@@ -4,6 +4,7 @@ import { useEffect, useState, useSyncExternalStore } from "react";
 import dynamic from "next/dynamic";
 import type { HeapBlock } from "@/lib/sim/types";
 import { HeapVisualizer } from "./HeapVisualizer";
+import { useForensics } from "./forensics/ForensicsProvider";
 
 const HeapScene3D = dynamic(
   () => import("./three/HeapScene3D").then((m) => m.HeapScene3D),
@@ -49,6 +50,10 @@ export function HeapArena({ heap, focusId = null }: Props) {
     setUse3d(supports3D() && window.innerWidth >= 420);
   }, []);
 
+  const fx = useForensics();
+  const inspectable = !!fx?.enabled;
+  const effectiveFocus = fx?.focusId ?? focusId;
+
   if (use3d) {
     return (
       <section
@@ -56,13 +61,23 @@ export function HeapArena({ heap, focusId = null }: Props) {
         className="glass relative min-w-0 overflow-hidden p-0"
         style={{ minHeight: 340 }}
       >
-        <HeapScene3D heap={heap} focusId={focusId} reducedMotion={reduced} />
+        <HeapScene3D
+          heap={heap}
+          focusId={effectiveFocus}
+          reducedMotion={reduced}
+          selectedId={fx?.selectedBlock ?? null}
+          onSelect={inspectable ? fx.select : undefined}
+        />
       </section>
     );
   }
   return (
     <div className="glass p-2">
-      <HeapVisualizer heap={heap} />
+      <HeapVisualizer
+        heap={heap}
+        selectedId={fx?.selectedBlock ?? null}
+        onSelect={inspectable ? fx.select : undefined}
+      />
     </div>
   );
 }

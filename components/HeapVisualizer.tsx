@@ -5,6 +5,9 @@ import { HeapBlock } from "./HeapBlock";
 
 interface Props {
   heap: HeapBlockT[];
+  /** FORENSICS mode: selected block + click-to-inspect. */
+  selectedId?: number | null;
+  onSelect?: (id: number | null) => void;
 }
 
 const LEGEND: Array<[string, string]> = [
@@ -17,7 +20,7 @@ const LEGEND: Array<[string, string]> = [
 ];
 
 /** Request-arena heap map — the "make the invisible visible" panel. */
-export function HeapVisualizer({ heap }: Props) {
+export function HeapVisualizer({ heap, selectedId = null, onSelect }: Props) {
   return (
     <section aria-label="Heap memory map" className="rounded-lg border border-border bg-panel p-3">
       <div className="mb-2 flex items-center justify-between">
@@ -35,7 +38,15 @@ export function HeapVisualizer({ heap }: Props) {
       </div>
       <div className="grid grid-cols-6 gap-1.5 sm:grid-cols-8 lg:grid-cols-6 xl:grid-cols-8">
         {heap.map((b) => (
-          <HeapBlock key={b.id} id={b.id} state={b.state} tag={b.tag} showTag={b.state !== "free"} />
+          <HeapBlock
+            key={b.id}
+            id={b.id}
+            state={b.state}
+            tag={b.tag}
+            showTag={b.state !== "free"}
+            selected={selectedId === b.id}
+            onSelect={onSelect}
+          />
         ))}
       </div>
     </section>

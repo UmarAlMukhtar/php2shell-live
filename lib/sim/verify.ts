@@ -1,5 +1,6 @@
 import { CVE, TARGET_PATCH_VERSION } from "./cve";
 import { isPatchLive, patchStagedButNotLive, pushLogs, pushTerm } from "./engine";
+import { emitDrafts } from "./trace";
 import { WORKER_ID, log } from "./logs";
 import type { SimState, TermLine, VerifyReport } from "./types";
 
@@ -86,6 +87,9 @@ export function runVerification(state: SimState): { state: SimState; report: Ver
       outcome === "success"
         ? `replay deflected — ${CVE.id} remediated on PHP ${TARGET_PATCH_VERSION}`
         : `replay succeeded — host still vulnerable to ${CVE.id}`),
+  ]);
+  next = emitDrafts(next, [
+    { kind: "verify", subject: "replay", detail: outcome === "success" ? `differential replay deflected — ${CVE.id} not reachable on PHP ${state.phpVersion}` : `replay reproduced the UAF path — host still vulnerable` },
   ]);
   return { state: next, report };
 }

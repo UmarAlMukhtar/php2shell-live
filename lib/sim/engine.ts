@@ -1,5 +1,7 @@
 import { ATTACKER_IP, AMBIENT_LOGS, HOSTNAME, WORKER_ID, log } from "./logs";
 import { SERVER_PHP_VERSION, isVulnerable } from "./cve";
+import { refIsStale } from "./invariants";
+import { blkLabel, emit, emitDrafts, fmtAddr, freshBlock, stamp } from "./trace";
 import type {
   AttackerActionId,
   AttackerStage,
@@ -7,6 +9,7 @@ import type {
   HeapBlock,
   HeapOp,
   LogEntry,
+  SimReference,
   SimState,
   TermLine,
   VisualStep,
@@ -38,11 +41,7 @@ export const STAGE_ORDER: AttackerStage[] = [
 ];
 
 export function initialHeap(): HeapBlock[] {
-  return Array.from({ length: HEAP_SIZE }, (_, id) => ({
-    id,
-    state: "free" as const,
-    tag: null,
-  }));
+  return Array.from({ length: HEAP_SIZE }, (_, id) => freshBlock(id));
 }
 
 export function initialState(): SimState {
@@ -63,6 +62,9 @@ export function initialState(): SimState {
     attackerStage: "IDLE",
     attackerProgress: 0,
     heap: initialHeap(),
+    refs: [],
+    heapSeq: 0,
+    trace: [],
     logs: [
       withSeq(0, log("info", "system", `SIMULATION BOOT — fictional host ${HOSTNAME}`)),
       withSeq(1, log("info", "php-fpm", `pool www: ${WORKER_ID} ready (PHP ${SERVER_PHP_VERSION})`)),
@@ -94,17 +96,132 @@ export function pushTerm(state: SimState, lines: TermLine[]): SimState {
   return { ...state, term: [...state.term, ...lines].slice(-TERM_LIMIT) };
 }
 
+const FREEISH: ReadonlySet<HeapBlock["state"]> = new Set(["free", "freed"]);
+const LIVE: ReadonlySet<HeapBlock["state"]> = new Set([
+  "allocated",
+  "reused",
+  "stale",
+  "corrupted",
+]);
+
+/**
+ * Apply heap mutations with full lifetime bookkeeping: every op advances
+ * the logical clock, records a history transition, bumps the generation on
+ * re-issue, maintains the $GLOBALS reference set, and emits trace events.
+ */
 export function applyHeapOps(state: SimState, ops: HeapOp[]): SimState {
   if (!ops || ops.length === 0) return state;
-  const heap = state.heap.map((b) => ({ ...b }));
+  const heap = state.heap.map((b) => ({ ...b, history: [...b.history] }));
+  const refs = state.refs.map((r) => ({ ...r }));
+  let seq = state.heapSeq;
+  const events = [] as ReturnType<typeof stamp>[];
+  const push = (e: Omit<Parameters<typeof stamp>[1], "id" | "ts">) =>
+    events.push(stamp(seq++, e));
+
   for (const op of ops) {
     const block = heap[op.id];
-    if (!block) continue;
+    if (!block || block.state === op.state && op.tag === undefined) continue;
+    const prev = block.state;
+    const wasStaleRefs = refs
+      .filter((r) => r.targetId === op.id)
+      .map((r) => ({ ...r, stale: refIsStale(r, block) }));
+
+    // Re-issue bumps the generation — this is what a stale reference misses.
+    // 'stale' counts as re-issued too: the dangling ref still captured the
+    // old generation while the slot moved on to a new owner.
+    const reissued =
+      (op.state === "allocated" || op.state === "reused") &&
+      (FREEISH.has(prev) || prev === "stale");
+    if (reissued) {
+      block.generation += 1;
+    }
     block.state = op.state;
     if (op.tag !== undefined) block.tag = op.tag;
     if (op.state === "free") block.tag = null;
+    block.owner = LIVE.has(op.state)
+      ? (op.tag !== undefined ? op.tag : block.owner)
+      : null;
+    const histTs = seq;
+    block.history.push({ ts: histTs, to: op.state });
+
+    const addr = fmtAddr(block.addr);
+    const owner = block.owner ?? "arena";
+
+    if (reissued) {
+      push({
+        kind: prev === "free" && block.generation === 1 ? "alloc" : "reuse",
+        subject: blkLabel(op.id),
+        detail:
+          prev === "free" && block.generation === 1
+            ? `${blkLabel(op.id)} @${addr} allocated (gen${block.generation}) by ${owner}`
+            : `${blkLabel(op.id)} @${addr} re-issued as gen${block.generation} to ${owner}`,
+        before: prev,
+        after: op.state,
+      });
+    } else if (op.state === "freed" || op.state === "free") {
+      push({
+        kind: "free",
+        subject: blkLabel(op.id),
+        detail: `${blkLabel(op.id)} @${addr} (gen${block.generation}) returned to the pool`,
+        before: prev,
+        after: op.state,
+      });
+      if (op.state === "free") {
+        // Full reset (restart) — the referencing scope is wiped too.
+        for (let i = refs.length - 1; i >= 0; i--) {
+          if (refs[i]!.targetId === op.id) refs.splice(i, 1);
+        }
+      }
+    } else if (op.state === "stale") {
+      // Abnormal cleanup left $GLOBALS pointing at this allocation.
+      const ref: SimReference = {
+        id: `globals->${op.id}`,
+        source: "$GLOBALS",
+        targetId: op.id,
+        generation: block.generation,
+      };
+      const existing = refs.findIndex((r) => r.id === ref.id);
+      if (existing >= 0) refs[existing] = ref;
+      else refs.push(ref);
+      push({
+        kind: "ref_create",
+        subject: "$GLOBALS",
+        detail: `$GLOBALS captured ${blkLabel(op.id)} @${addr} (gen${block.generation}) — abnormal cleanup left it dangling`,
+        before: prev,
+        after: op.state,
+      });
+    } else if (op.state === "corrupted") {
+      push({
+        kind: "unsafe_access",
+        subject: blkLabel(op.id),
+        detail: `write/read through an invalid reference corrupted ${blkLabel(op.id)} @${addr} — modeled UAF`,
+        before: prev,
+        after: op.state,
+      });
+    } else {
+      push({
+        kind: "reuse",
+        subject: blkLabel(op.id),
+        detail: `${blkLabel(op.id)} @${addr}: ${prev} → ${op.state} (gen${block.generation}, ${owner})`,
+        before: prev,
+        after: op.state,
+      });
+    }
+
+    // Any transition that invalidates a previously-valid ref is a violation.
+    for (const w of wasStaleRefs) {
+      const now = refs.find((r) => r.id === w.id);
+      if (!w.stale && now && refIsStale(now, block)) {
+        push({
+          kind: "stale_detected",
+          subject: now.source,
+          detail: `${now.source}→${blkLabel(op.id)} now INVALID — captured gen${now.generation}, block is gen${block.generation}`,
+        });
+      }
+    }
   }
-  return { ...state, heap };
+
+  return emit({ ...state, heap, refs }, events);
 }
 
 /** True once the patched build is actually running (staged AND restarted). */
@@ -122,6 +239,9 @@ export function applyVisualStep(state: SimState, index: number, step: VisualStep
   if (step.status) next = { ...next, status: step.status };
   if (step.attackerStage) next = { ...next, attackerStage: step.attackerStage };
   if (step.heapOps) next = applyHeapOps(next, step.heapOps);
+  if (step.trace) {
+    next = emitDrafts(next, step.trace);
+  }
   if (step.term) next = pushTerm(next, step.term);
   if (step.logs) next = pushLogs(next, step.logs);
   return next;

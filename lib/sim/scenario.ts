@@ -29,6 +29,9 @@ export const VISUAL_TIMELINE: VisualStep[] = [
       state: "allocated" as const,
       tag: "zend_mm",
     })),
+    trace: [
+      { kind: "request", subject: "req#115", detail: "request #115 initialized — arena chunks borrowed" },
+    ],
     term: [
       { kind: "sys", text: `monitoring ${WORKER_ID} · PHP ${SERVER_PHP_VERSION} · request arena visible` },
       { kind: "out", text: "GET / 200 · GET /healthz 200 · traffic nominal" },
@@ -48,6 +51,9 @@ export const VISUAL_TIMELINE: VisualStep[] = [
     status: "UNDER_ATTACK",
     attackerStage: "PROBE",
     heapOps: [6, 7, 8, 9].map((id) => ({ id, state: "allocated" as const, tag: "req#116" })),
+    trace: [
+      { kind: "request", subject: "req#116", detail: `req#116 initialized — oversized POST from ${ATTACKER_IP}` },
+    ],
     term: [
       { kind: "in", text: `ingress ← POST /upload.php  body=2.4MB  src=${ATTACKER_IP}` },
       { kind: "err", text: `[sim] 413-leaning request pattern — repeated 3×` },
@@ -71,6 +77,9 @@ export const VISUAL_TIMELINE: VisualStep[] = [
       { id: 7, state: "freed", tag: "req#116" },
       { id: 8, state: "freed", tag: "req#116" },
       { id: 9, state: "stale", tag: "req#116" },
+    ],
+    trace: [
+      { kind: "cleanup", subject: "req#116", detail: "abnormal cleanup — request arena released, global-state reset incomplete" },
     ],
     term: [
       { kind: "err", text: `PHP Fatal error: Allowed memory size exhausted` },

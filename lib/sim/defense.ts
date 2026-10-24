@@ -5,6 +5,7 @@ import {
   pushTerm,
   STAGE_ORDER,
 } from "./engine";
+import { emitDrafts } from "./trace";
 import { ATTACKER_IP, WORKER_ID, log } from "./logs";
 import type { DefenderActionId, SimState } from "./types";
 
@@ -135,6 +136,9 @@ export const DEFENDER_ACTIONS: readonly DefenderActionDef[] = [
         { kind: "in", text: `soc> pkg install php=${TARGET_PATCH_VERSION}` },
         { kind: "out", text: "  staged. Old workers still serve traffic until restart." },
       ]);
+      next = emitDrafts(next, [
+        { kind: "remediate", subject: "runtime", detail: `PHP ${TARGET_PATCH_VERSION} staged — not live until restart` },
+      ]);
       return recordAction(next, "apply_patch");
     },
   },
@@ -180,6 +184,9 @@ export const DEFENDER_ACTIONS: readonly DefenderActionDef[] = [
         patched
           ? { kind: "ok", text: `  workers up on PHP ${TARGET_PATCH_VERSION} — patch LIVE` }
           : { kind: "out", text: `  workers up on PHP ${SERVER_PHP_VERSION} — still vulnerable` },
+      ]);
+      next = emitDrafts(next, [
+        { kind: "remediate", subject: WORKER_ID, detail: patched ? `restart onto PHP ${TARGET_PATCH_VERSION} — global state reset fixed` : `restart — request arena wiped, runtime still ${SERVER_PHP_VERSION}` },
       ]);
       return recordAction(next, "restart_services");
     },

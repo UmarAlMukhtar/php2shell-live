@@ -9,6 +9,8 @@ import { IncidentStatus } from "./IncidentStatus";
 import { ReportView } from "./ReportView";
 import { VersionBadge } from "./VersionBadge";
 import { VisualizeView } from "./VisualizeView";
+import { ForensicsPanel } from "./forensics/ForensicsPanel";
+import { ForensicsProvider, useForensics } from "./forensics/ForensicsProvider";
 
 const PHASES = ["visualize", "defend", "verify"] as const;
 const PHASE_LABELS: Record<(typeof PHASES)[number], string> = {
@@ -23,6 +25,39 @@ function phaseIndex(phase: string): number {
 }
 
 export function Game() {
+  return (
+    <ForensicsProvider>
+      <GameInner />
+    </ForensicsProvider>
+  );
+}
+
+function ForensicsToggle() {
+  const fx = useForensics();
+  if (!fx) return null;
+  return (
+    <button
+      type="button"
+      onClick={fx.toggle}
+      aria-pressed={fx.enabled}
+      className={`rounded border px-3 py-1.5 font-mono text-[10px] font-bold tracking-widest uppercase transition-colors ${
+        fx.enabled
+          ? "border-cyan/60 bg-cyan/15 text-cyan"
+          : "border-cyan/30 bg-cyan/5 text-cyan/70 hover:bg-cyan/10"
+      }`}
+    >
+      ◎ forensics
+    </button>
+  );
+}
+
+function ForensicsDrawer() {
+  const fx = useForensics();
+  if (!fx?.enabled) return null;
+  return <ForensicsPanel />;
+}
+
+function GameInner() {
   const { state } = useSim();
   const current = phaseIndex(state.phase);
   const breaching = state.status === "BREACHED" && state.phase !== "report";
@@ -45,6 +80,7 @@ export function Game() {
           </h1>
         </div>
         <div className="flex items-center gap-3">
+          <ForensicsToggle />
           <Link
             href="/play"
             className="rounded border border-danger/40 bg-danger/10 px-3 py-1.5 font-mono text-[10px] font-bold tracking-widest text-danger uppercase hover:bg-danger/20"
@@ -88,6 +124,7 @@ export function Game() {
         {state.phase === "visualize" ? <VisualizeView /> : null}
         {state.phase === "defend" ? <DefendView /> : null}
         {state.phase === "report" || state.phase === "verify" ? <ReportView /> : null}
+        <ForensicsDrawer />
       </main>
 
       <footer className="border-t border-border pt-3 text-center font-mono text-[10px] text-muted">

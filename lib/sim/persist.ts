@@ -1,3 +1,4 @@
+import { normalizeSim } from "./trace";
 import type { SimState } from "./types";
 
 export const STORAGE_KEY = "php2shell.sim.v1";
@@ -10,7 +11,9 @@ export function readSavedSim(
     const raw = storage?.getItem(STORAGE_KEY);
     if (!raw) return null;
     const saved = JSON.parse(raw) as SimState;
-    return saved && typeof saved.tick === "number" ? saved : null;
+    if (!saved || typeof saved.tick !== "number") return null;
+    // Fill forensics fields absent from older saves.
+    return normalizeSim(saved);
   } catch {
     return null;
   }
