@@ -4,12 +4,12 @@ import { motion } from "motion/react";
 import type { HeapBlockState } from "@/lib/sim/types";
 
 const STATE_STYLE: Record<HeapBlockState, string> = {
-  free: "border-border bg-panel-2 text-muted",
-  allocated: "border-info/60 bg-info/10 text-info",
-  freed: "border-muted/40 bg-transparent text-muted/60",
-  reused: "border-warn/70 bg-warn/10 text-warn",
-  stale: "border-danger/70 bg-danger/10 text-danger",
-  corrupted: "border-danger bg-danger/25 text-danger",
+  free: "border-border bg-surface-2 text-fg-faint",
+  allocated: "border-accent/60 bg-accent/10 text-accent",
+  freed: "border-fg-faint/40 bg-transparent text-fg-muted",
+  reused: "border-vuln/70 bg-vuln/10 text-vuln",
+  stale: "border-attack/70 bg-attack/10 text-attack",
+  corrupted: "border-breach bg-breach/25 text-breach",
 };
 
 interface Props {
@@ -28,7 +28,7 @@ export function HeapBlock({ id, state, tag, showTag, selected = false, onSelect 
       {showTag && tag ? <span className="truncate px-0.5 font-bold">{tag}</span> : null}
     </>
   );
-  const cls = `flex h-12 w-full flex-col items-center justify-center rounded border font-mono text-[10px] leading-tight ${STATE_STYLE[state]} ${selected ? "ring-2 ring-cyan" : ""}`;
+  const cls = `flex h-12 w-full flex-col items-center justify-center rounded border font-mono text-[10px] leading-tight ${STATE_STYLE[state]} ${selected ? "ring-2 ring-accent" : ""}`;
 
   const motionProps = {
     layout: true as const,

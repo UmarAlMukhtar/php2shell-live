@@ -58,7 +58,7 @@ export function HeapArena({ heap, focusId = null }: Props) {
     return (
       <section
         aria-label="Heap memory arena"
-        className="glass relative min-w-0 overflow-hidden p-0"
+        className="relative min-w-0 overflow-hidden rounded-[10px] border border-border bg-surface-1 p-0"
         style={{ minHeight: 340 }}
       >
         <HeapScene3D
@@ -72,12 +72,10 @@ export function HeapArena({ heap, focusId = null }: Props) {
     );
   }
   return (
-    <div className="glass p-2">
-      <HeapVisualizer
-        heap={heap}
-        selectedId={fx?.selectedBlock ?? null}
-        onSelect={inspectable ? fx.select : undefined}
-      />
-    </div>
+    <HeapVisualizer
+      heap={heap}
+      selectedId={fx?.selectedBlock ?? null}
+      onSelect={inspectable ? fx.select : undefined}
+    />
   );
 }
