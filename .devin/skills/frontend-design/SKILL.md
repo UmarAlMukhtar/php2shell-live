@@ -7,11 +7,17 @@ description: Design conventions for PHP2Shell: Live UI — Tailwind v4 tokens, M
 
 ## Aesthetic direction
 
-- Dark, terminal-native interface: near-black background, phosphor-green
-  accents (emerald family), monospace type for terminal/console surfaces.
+- Modern dark operations dashboard: deep-graphite layered surfaces
+  (`--surface-1..3`), hairline borders, no glows or scanlines. Sans-serif
+  for navigation/explanations; monospace only for the xterm terminal, logs,
+  addresses, and technical identifiers.
+- One restrained accent (`--color-accent` blue) for nav/focus/primary
+  actions plus a semantic status set: `--color-vuln` (amber),
+  `--color-attack` (orange), `--color-breach` (red), `--color-contained`
+  (blue), `--color-ok` (green). `--color-muted-state` is for borders/fills
+  only — it fails contrast as text.
 - Theme tokens are defined once in `app/globals.css` via `@theme inline` —
-  reference the tokens (`--color-background`, `--color-foreground`, and any
-  added accents) instead of raw hex values in components.
+  reference the tokens instead of raw hex values in components.
 - Security-tooling mood, but clearly a *training* product: label simulated
   surfaces so users never mistake them for a real shell.
 
