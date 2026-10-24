@@ -2,6 +2,7 @@
 
 import { TARGET_PATCH_VERSION, CVE } from "@/lib/sim/cve";
 import { useSim } from "./SimProvider";
+import Link from "next/link";
 import { BreachEffect } from "./BreachEffect";
 import { DefendView } from "./DefendView";
 import { IncidentStatus } from "./IncidentStatus";
@@ -43,6 +44,12 @@ export function Game() {
           </h1>
         </div>
         <div className="flex items-center gap-3">
+          <Link
+            href="/play"
+            className="rounded border border-danger/40 bg-danger/10 px-3 py-1.5 font-mono text-[10px] font-bold tracking-widest text-danger uppercase hover:bg-danger/20"
+          >
+            multiplayer →
+          </Link>
           <VersionBadge
             version={state.phpVersion}
             patchStaged={state.patchApplied && !state.restartedAfterPatch}

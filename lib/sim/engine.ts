@@ -1,6 +1,7 @@
 import { ATTACKER_IP, AMBIENT_LOGS, HOSTNAME, WORKER_ID, log } from "./logs";
 import { SERVER_PHP_VERSION, isVulnerable } from "./cve";
 import type {
+  AttackerActionId,
   AttackerStage,
   DefenderActionId,
   HeapBlock,
@@ -256,6 +257,7 @@ export type SimAction =
   | { type: "VISUAL_GOTO"; index: number }
   | { type: "VISUAL_RESTART" }
   | { type: "DEFEND"; action: DefenderActionId }
+  | { type: "ATTACK"; action: AttackerActionId }
   | { type: "SET_PHASE"; phase: SimState["phase"] }
   | { type: "RESET" }
   | { type: "HYDRATE"; state: SimState };

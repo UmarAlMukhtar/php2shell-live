@@ -35,18 +35,21 @@ export function SimProvider({ children }: { children: ReactNode }) {
 
   // Refresh recovery — hydrate once on mount (client-only).
   useEffect(() => {
-    try {
-      const raw = sessionStorage.getItem(STORAGE_KEY);
-      if (raw) {
-        const saved = JSON.parse(raw) as SimState;
-        if (saved && typeof saved.tick === "number") {
-          dispatch({ type: "HYDRATE", state: saved });
+    const t = setTimeout(() => {
+      try {
+        const raw = sessionStorage.getItem(STORAGE_KEY);
+        if (raw) {
+          const saved = JSON.parse(raw) as SimState;
+          if (saved && typeof saved.tick === "number") {
+            dispatch({ type: "HYDRATE", state: saved });
+          }
         }
+      } catch {
+        // Corrupt/absent storage → fresh state, which is fine.
       }
-    } catch {
-      // Corrupt/absent storage → fresh state, which is fine.
-    }
-    setHydrated(true);
+      setHydrated(true);
+    }, 0);
+    return () => clearTimeout(t);
   }, []);
 
   useEffect(() => {

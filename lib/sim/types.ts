@@ -39,6 +39,16 @@ export type DefenderActionId =
   | "apply_patch"
   | "restart_services";
 
+/** Human-driven attacker moves in multiplayer (mirrors attacker stages). */
+export type AttackerActionId =
+  | "recon"
+  | "probe"
+  | "trigger"
+  | "groom"
+  | "uaf"
+  | "seize"
+  | "rotate_source";
+
 export type LogLevel = "info" | "warn" | "error" | "crit";
 
 export interface LogEntry {

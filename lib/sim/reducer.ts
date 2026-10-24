@@ -1,3 +1,4 @@
+import { applyAttackerAction } from "./attack";
 import { applyDefenderAction } from "./defense";
 import { applyVisualStep, initialState, tick, type SimAction } from "./engine";
 import { VISUAL_TIMELINE } from "./scenario";
@@ -32,6 +33,8 @@ export function reduce(state: SimState, action: GameAction): SimState {
     }
     case "DEFEND":
       return applyDefenderAction(state, action.action);
+    case "ATTACK":
+      return applyAttackerAction(state, action.action).state;
     case "SET_PHASE":
       return { ...state, phase: action.phase };
     case "VERIFY":
