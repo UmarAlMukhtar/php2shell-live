@@ -205,7 +205,7 @@ export function MpView({
             ) : (
               <p className="font-mono text-[10px] leading-4 text-muted">
                 Goal: reach BREACH before they patch. Blocked? Rotate source.
-                Patch live? You're deflected — the defender wins on verify.
+                Patch live? You&rsquo;re deflected — the defender wins on verify.
               </p>
             )}
             <VersionBadge

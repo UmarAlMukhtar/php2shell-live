@@ -264,3 +264,55 @@ describe("rooms", () => {
     expect(j.player.name).toBe("ablong-call-sign-xxxxxxx");
   });
 });
+
+describe("reconnect presence propagation", () => {
+  it("rejoin bumps seq so peers see the presence transition", async () => {
+    const room = await createRoom(store);
+    const j = await joinRoom(store, room.code, "att", "attacker");
+    if ("error" in j) throw new Error("join failed");
+    const seqAfterJoin = j.room.seq;
+
+    // Player drops off (lastSeen 0 → snapshot shows disconnected).
+    const stale = await store.get(room.code);
+    stale!.players[0]!.connected = false;
+    stale!.players[0]!.lastSeen = 0;
+    await store.cas(room.code, stale!.seq, stale!);
+    expect(snapshot(stale!).players[0]!.connected).toBe(false);
+
+    // Reconnect with the same id+token → seq advances and both show connected.
+    const re = await joinRoom(
+      store, room.code, "att", "attacker", j.player.id, j.player.token,
+    );
+    if ("error" in re) throw new Error("rejoin failed");
+    expect(re.room.seq).toBeGreaterThan(seqAfterJoin);
+    const snap = snapshot(re.room);
+    expect(snap.players).toHaveLength(1);
+    expect(snap.players[0]!.connected).toBe(true);
+  });
+
+  it("rejects a wrong token on rejoin without touching presence", async () => {
+    const room = await createRoom(store);
+    const j = await joinRoom(store, room.code, "att", "attacker");
+    if ("error" in j) throw new Error("join failed");
+    const re = await joinRoom(
+      store, room.code, "att", "attacker", j.player.id, "bogus-token",
+    );
+    expect("error" in re && re.error).toBe("invalid_session");
+  });
+});
+
+describe("room codes", () => {
+  it("isRoomCode accepts only generated 4-char codes", async () => {
+    const { isRoomCode } = await import("@/lib/mp/protocol");
+    expect(isRoomCode("K7MN")).toBe(true);
+    expect(isRoomCode("2345")).toBe(true);
+    for (const bad of ["", "abc", "abc!", "ABCDE", "k7mn", "I0LO", "A B C", "AB/C"]) {
+      expect(isRoomCode(bad)).toBe(false);
+    }
+  });
+
+  it("joinRoom on a nonexistent code errors cleanly", async () => {
+    const r = await joinRoom(store, "ZZZZ", "x", "defender");
+    expect("error" in r && r.error).toBe("room_not_found");
+  });
+});

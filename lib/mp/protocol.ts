@@ -6,6 +6,11 @@ import type {
 
 export type Role = "defender" | "attacker" | "spectator";
 
+/** Valid room-code shape — same alphabet/length the server generates. */
+export function isRoomCode(code: string): boolean {
+  return /^[A-Z2-9]{4}$/.test(code);
+}
+
 export interface Player {
   id: string;
   /** Secret used to authenticate actions and reconnects. Never leaves the server. */

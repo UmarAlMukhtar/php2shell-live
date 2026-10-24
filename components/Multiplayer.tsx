@@ -13,7 +13,7 @@ import {
   type ConnState,
   type MpIdentity,
 } from "@/lib/mp/client";
-import type { Role, RoomSnapshot } from "@/lib/mp/protocol";
+import { isRoomCode, type Role, type RoomSnapshot } from "@/lib/mp/protocol";
 import { MpView } from "./MpView";
 
 type Phase = "lobby" | "room";
@@ -87,18 +87,25 @@ export function Multiplayer() {
   };
 
   const join = async () => {
-    if (!code.trim()) {
+    const trimmed = code.trim().toUpperCase();
+    if (!trimmed) {
       setErr("Enter a room code.");
+      return;
+    }
+    // Reject malformed codes before any request — avoids the HTML-error
+    // parse path entirely.
+    if (!isRoomCode(trimmed)) {
+      setErr("Invalid code — rooms are 4 letters/digits, e.g. K7MN.");
       return;
     }
     setBusy(true);
     setErr(null);
     const stored = loadIdentity();
     const joined = await joinRoomRest(
-      code.trim(),
+      trimmed,
       name || "anon",
       role,
-      stored?.code === code.trim().toUpperCase() ? stored : undefined,
+      stored?.code === trimmed ? stored : undefined,
     );
     setBusy(false);
     if (!joined.ok) {
@@ -107,7 +114,9 @@ export function Multiplayer() {
           ? "No room with that code."
           : joined.error === "room_full"
             ? "That room is full."
-            : joined.error,
+            : joined.error === "invalid_code"
+              ? "Invalid code — rooms are 4 letters/digits, e.g. K7MN."
+              : joined.error,
       );
       return;
     }

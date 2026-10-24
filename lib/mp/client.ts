@@ -1,5 +1,6 @@
 "use client";
 
+import { isRoomCode } from "@/lib/mp/protocol";
 import type {
   Role,
   RoomAction,
@@ -262,22 +263,29 @@ export async function joinRoomRest(
   | { ok: true; identity: MpIdentity; role: Role }
   | { ok: false; error: string }
 > {
-  const res = await fetch(`/api/room/${code.toUpperCase()}/join`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      name,
-      role,
-      playerId: identity?.playerId,
-      token: identity?.token,
-    }),
-  });
-  const data = (await res.json()) as {
-    error?: string;
-    playerId?: string;
-    token?: string;
-    role?: Role;
-  };
+  if (!isRoomCode(code.toUpperCase())) return { ok: false, error: "invalid_code" };
+  let res: Response;
+  try {
+    res = await fetch(`/api/room/${code.toUpperCase()}/join`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        name,
+        role,
+        playerId: identity?.playerId,
+        token: identity?.token,
+      }),
+    });
+  } catch {
+    return { ok: false, error: "Network error — could not reach the room." };
+  }
+  let data: { error?: string; playerId?: string; token?: string; role?: Role };
+  try {
+    data = (await res.json()) as typeof data;
+  } catch {
+    // Non-JSON error page (proxy/html 404, etc.) — never an unhandled throw.
+    return { ok: false, error: res.ok ? "join failed" : "room_not_found" };
+  }
   if (!res.ok) return { ok: false, error: data.error ?? "join failed" };
   return {
     ok: true,

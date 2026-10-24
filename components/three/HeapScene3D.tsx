@@ -4,7 +4,7 @@ import { useMemo, useState, useCallback } from "react";
 import { Canvas } from "@react-three/fiber";
 import { Html, Line } from "@react-three/drei";
 import type { HeapBlock, HeapBlockState } from "@/lib/sim/types";
-import { HeapBlock3D, STATE_COLOR } from "./HeapBlock3D";
+import { HeapBlock3D } from "./HeapBlock3D";
 import { PointerLink3D } from "./PointerLink3D";
 import { HeapCameraController } from "./HeapCameraController";
 import { HeapLegend3D } from "./HeapLegend3D";

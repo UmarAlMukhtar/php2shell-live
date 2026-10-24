@@ -102,8 +102,11 @@ export async function joinRoom(
       existing.connected = true;
       existing.lastSeen = Date.now();
       if (name) existing.name = name;
-      await store.cas(code, room.seq, room);
-      return { room, player: existing };
+      // Bump seq — watchers/polls only propagate on seq change, so without
+      // this a returning player stays "✕" on every peer's screen.
+      const next = { ...room, seq: room.seq + 1, updatedAt: Date.now() };
+      await store.cas(code, room.seq, next);
+      return { room: next, player: existing };
     }
     return { error: "invalid_session" };
   }

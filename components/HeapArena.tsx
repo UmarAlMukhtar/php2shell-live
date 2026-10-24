@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import dynamic from "next/dynamic";
 import type { HeapBlock } from "@/lib/sim/types";
 import { HeapVisualizer } from "./HeapVisualizer";
@@ -32,15 +32,21 @@ function supports3D(): boolean {
  */
 export function HeapArena({ heap, focusId = null }: Props) {
   const [use3d, setUse3d] = useState(false);
-  const [reduced, setReduced] = useState(false);
+  // prefers-reduced-motion is a live external store — subscribe properly.
+  const reduced = useSyncExternalStore(
+    (onChange) => {
+      const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+      mq.addEventListener("change", onChange);
+      return () => mq.removeEventListener("change", onChange);
+    },
+    () => window.matchMedia("(prefers-reduced-motion: reduce)").matches,
+    () => false,
+  );
 
   useEffect(() => {
-    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
-    setReduced(mq.matches);
-    const on = (e: MediaQueryListEvent) => setReduced(e.matches);
-    mq.addEventListener("change", on);
+    // Mount-gated capability check — can't run during SSR.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setUse3d(supports3D() && window.innerWidth >= 420);
-    return () => mq.removeEventListener("change", on);
   }, []);
 
   if (use3d) {
