@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
 import {
   INTRO_KEY,
+  INTRO_REVEAL_MS,
   hasSavedSim,
+  introAutoMs,
   introSeen,
   markIntroSeen,
   shouldShowIntro,
@@ -64,5 +66,28 @@ describe("intro gate", () => {
     expect(shouldShowIntro(throwing, mapStorage())).toBe(false);
     expect(hasSavedSim(throwing)).toBe(false);
     expect(() => markIntroSeen(throwing)).not.toThrow();
+  });
+});
+
+describe("auto-completion", () => {
+  it("fires only after the whole wall has animated in plus a dwell", () => {
+    const lines = 6;
+    const wall = 150 + (lines - 1) * 350;
+    expect(introAutoMs(false, lines)).toBeGreaterThanOrEqual(wall + 1500);
+    expect(introAutoMs(true, lines)).toBeGreaterThanOrEqual(wall + 1500);
+    expect(introAutoMs(false, 0)).toBeGreaterThan(0);
+    expect(introAutoMs(false, 1)).toBeGreaterThanOrEqual(150 + 1500);
+  });
+
+  it("reveal stays within the spec budget", () => {
+    expect(INTRO_REVEAL_MS).toBeLessThanOrEqual(600);
+  });
+
+  it("completion persists the intro key so the next visit bypasses", () => {
+    // completion and Skip share the same markIntroSeen path
+    const ls = mapStorage();
+    markIntroSeen(ls);
+    expect(shouldShowIntro(ls, mapStorage())).toBe(false);
+    expect(introSeen(ls)).toBe(true);
   });
 });

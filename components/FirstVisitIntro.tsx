@@ -3,9 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { motion, useReducedMotion } from "motion/react";
 import { CVE } from "@/lib/sim/cve";
-
-/** Fade-out + mount margin before the dashboard is interactive again. */
-const REVEAL_MS = 600;
+import { INTRO_REVEAL_MS, introAutoMs } from "@/lib/ui/introGate";
 
 /** Verified incident facts only — nothing here claims more than the sim does. */
 const LINES = [
@@ -36,8 +34,13 @@ export function FirstVisitIntro({ onDone }: Props) {
   const dismiss = useCallback(() => {
     if (closing) return;
     setClosing(true);
-    window.setTimeout(onDone, reduced ? 0 : REVEAL_MS);
+    window.setTimeout(onDone, reduced ? 0 : INTRO_REVEAL_MS);
   }, [closing, onDone, reduced]);
+
+  useEffect(() => {
+    const id = window.setTimeout(dismiss, introAutoMs(!!reduced, LINES.length));
+    return () => clearTimeout(id);
+  }, [dismiss, reduced]);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-bg/90 px-4">

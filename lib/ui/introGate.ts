@@ -41,3 +41,20 @@ export function hasSavedSim(storage: Reader): boolean {
 export function shouldShowIntro(local: Reader, session: Reader): boolean {
   return !introSeen(local) && !hasSavedSim(session);
 }
+
+/* --- auto-completion timing --- */
+
+/** Fade duration for the dismiss reveal (spec: <= 600 ms). */
+export const INTRO_REVEAL_MS = 600;
+const FIRST_LINE_MS = 150;
+const LINE_STAGGER_MS = 350;
+const MIN_DWELL_MS = 1500;
+const AUTO_MS = 6000;
+const AUTO_MS_REDUCED = 3500;
+
+/** When the wall auto-completes: never before the last line has animated in
+ *  plus a dwell — Skip/Escape are shortcuts, the timer is the contract. */
+export function introAutoMs(reduced: boolean, lineCount: number): number {
+  const wall = FIRST_LINE_MS + Math.max(0, lineCount - 1) * LINE_STAGGER_MS;
+  return Math.max(reduced ? AUTO_MS_REDUCED : AUTO_MS, wall + MIN_DWELL_MS);
+}
