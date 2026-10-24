@@ -2,6 +2,7 @@
 
 import { useSim } from "./SimProvider";
 import { useForensics } from "./forensics/ForensicsProvider";
+import { EvidenceSection } from "./EvidenceSection";
 import { LogStream } from "./LogStream";
 import { ReportCard } from "./ReportCard";
 import { Terminal } from "./Terminal";
@@ -18,7 +19,7 @@ export function ReportView() {
         <button
           type="button"
           onClick={fx.toggle}
-          className="glass w-fit px-3 py-1.5 font-mono text-[10px] font-bold tracking-widest text-cyan uppercase hover:bg-cyan/10"
+          className="w-fit rounded-lg border border-border bg-surface-2 px-3 py-1.5 text-[11px] font-semibold tracking-widest text-accent uppercase hover:border-accent/60"
         >
           ◎ inspect the evidence — open forensics
         </button>
@@ -29,13 +30,15 @@ export function ReportView() {
           onRestart={() => dispatch({ type: "RESET" })}
           onBackToDefend={() => dispatch({ type: "SET_PHASE", phase: "defend" })}
         />
-        <div className="flex min-h-[300px] min-w-0 flex-col gap-4">
-          <div className="glass min-h-[220px] flex-1 overflow-hidden">
-            <Terminal lines={state.term} className="h-full" />
-          </div>
-          <div className="glass">
-            <LogStream logs={state.logs} />
-          </div>
+        <div className="flex min-w-0 flex-col gap-4">
+          <EvidenceSection title="Simulated terminal" className="min-h-[220px]">
+            <Terminal lines={state.term} className="h-full min-h-[220px]" />
+          </EvidenceSection>
+          <EvidenceSection title="Security logs">
+            <div className="max-h-64 overflow-hidden">
+              <LogStream logs={state.logs} />
+            </div>
+          </EvidenceSection>
         </div>
       </div>
     </div>

@@ -20,48 +20,53 @@ export function ReportCard({ report, onRestart, onBackToDefend }: Props) {
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
-      className={`rounded-lg border p-5 ${
-        ok ? "border-accent/60 bg-accent/5" : "border-danger/60 bg-danger/5"
+      className={`rounded-[10px] border border-border bg-surface-1 p-5 border-l-4 ${
+        ok ? "border-l-ok" : "border-l-breach"
       }`}
       aria-labelledby="report-title"
       data-testid="incident-report"
     >
-      <p className="font-mono text-[10px] tracking-widest text-muted uppercase">
+      <p className="text-[11px] font-semibold tracking-widest text-fg-faint uppercase">
         incident report — {CVE.id}
       </p>
       <h2
         id="report-title"
-        className={`mt-1 font-mono text-2xl font-bold tracking-widest ${
-          ok ? "text-accent" : "text-danger"
+        className={`mt-1 text-2xl font-extrabold tracking-wide ${
+          ok ? "text-ok" : "text-breach"
         }`}
       >
         {ok ? "PATCHED" : "STILL VULNERABLE"}
       </h2>
-      <p className="mt-2 text-sm text-foreground/90">{report.summary}</p>
+      <p className="mt-2 text-sm text-fg">{report.summary}</p>
 
       <div className="mt-4 grid gap-4 sm:grid-cols-2">
         <div>
-          <h3 className="mb-1 font-mono text-[10px] tracking-widest text-muted uppercase">
+          <h3 className="mb-1 text-[11px] font-semibold tracking-widest text-fg-muted uppercase">
             actions taken
           </h3>
-          <ul className="font-mono text-xs leading-6 text-foreground/80">
+          <ol className="space-y-1 text-sm leading-6 text-fg">
             {report.actionsTaken.length === 0 ? (
-              <li className="text-muted">— none —</li>
+              <li className="text-fg-faint">— none —</li>
             ) : (
-              report.actionsTaken.map((a) => (
-                <li key={a}>▸ {ACTION_LABELS.get(a) ?? a}</li>
+              report.actionsTaken.map((a, i) => (
+                <li key={a} className="flex gap-2">
+                  <span className="w-5 shrink-0 text-right font-mono text-[11px] leading-6 text-fg-faint">
+                    {i + 1}.
+                  </span>
+                  <span>{ACTION_LABELS.get(a) ?? a}</span>
+                </li>
               ))
             )}
-            <li className="text-muted">
+            <li className="font-mono text-[11px] text-fg-faint">
               restarts: {report.restarts} · capacity: {report.capacity}%
             </li>
-          </ul>
+          </ol>
         </div>
         <div>
-          <h3 className="mb-1 font-mono text-[10px] tracking-widest text-muted uppercase">
+          <h3 className="mb-1 text-[11px] font-semibold tracking-widest text-fg-muted uppercase">
             security lessons
           </h3>
-          <ul className="list-disc space-y-1 pl-4 text-xs leading-5 text-foreground/80">
+          <ul className="list-disc space-y-1 pl-4 text-xs leading-5 text-fg-muted">
             {report.lessons.map((l) => (
               <li key={l}>{l}</li>
             ))}
@@ -74,7 +79,7 @@ export function ReportCard({ report, onRestart, onBackToDefend }: Props) {
           <button
             type="button"
             onClick={onBackToDefend}
-            className="rounded border border-warn/60 bg-warn/10 px-4 py-2 font-mono text-xs text-warn hover:bg-warn/20 focus-visible:outline-2 focus-visible:outline-warn"
+            className="rounded-lg border border-vuln/60 bg-vuln/10 px-4 py-2 text-xs font-semibold text-vuln hover:bg-vuln/20 focus-visible:outline-2 focus-visible:outline-vuln"
           >
             ← back to defend
           </button>
@@ -82,7 +87,7 @@ export function ReportCard({ report, onRestart, onBackToDefend }: Props) {
         <button
           type="button"
           onClick={onRestart}
-          className="rounded border border-border bg-panel-2 px-4 py-2 font-mono text-xs text-foreground/90 hover:border-accent/60 hover:text-accent focus-visible:outline-2 focus-visible:outline-accent"
+          className="rounded-lg border border-border bg-surface-2 px-4 py-2 text-xs font-semibold text-fg hover:border-accent/60 hover:text-accent focus-visible:outline-2 focus-visible:outline-accent"
         >
           ↺ run the incident again
         </button>
