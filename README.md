@@ -27,7 +27,6 @@ real production capture. The full edit plan lives in `storyboard.json`.
 | ![First-visit intro narrating the incident before revealing the dashboard](docs/media/intro-modal.png) | ![Five-stage heap incident at BREACHED: 3D arena, stage rail, status telemetry](docs/media/visualize-incident.png) |
 | ![Forensics console: live model invariants and verified properties](docs/media/forensics-console.png) | ![Defend view: ordered response actions, live heap arena, terminal + logs](docs/media/defend-actions.png) |
 | ![Verify report after a truthful full journey: PATCHED, attack deflected](docs/media/verify-report.png) | ![Multiplayer lobby: attacker vs defender roles, host or join by code](docs/media/multiplayer-lobby.png) |
-| ![Mobile lobby at 390px](docs/media/mobile-390.png) | |
 
 ### Regenerate the video
 
@@ -119,6 +118,9 @@ CI (`.github/workflows/ci.yml`) runs the same gates on every push and PR.
   token (no accounts).
 - **Persistence** — room state is ephemeral (Redis key TTL); nothing is
   logged to a durable database.
+- **Known issue** — the `/` dashboard header overflows on ~390px viewports
+  (`scrollWidth` 420 vs client 390; the header row's title + chips don't
+  wrap). `/play` is clean at the same width.
 
 ## Docs
 
