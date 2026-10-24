@@ -18,7 +18,7 @@ export function ReportView() {
           onRestart={() => dispatch({ type: "RESET" })}
           onBackToDefend={() => dispatch({ type: "SET_PHASE", phase: "defend" })}
         />
-        <div className="flex min-h-[300px] flex-col gap-4">
+        <div className="flex min-h-[300px] min-w-0 flex-col gap-4">
           <div className="min-h-[220px] flex-1 rounded-lg border border-border bg-panel">
             <Terminal lines={state.term} className="h-full" />
           </div>

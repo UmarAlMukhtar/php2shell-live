@@ -63,7 +63,7 @@ export function VisualizeView() {
   return (
     <div className="flex flex-col gap-4">
       <div className="grid gap-4 lg:grid-cols-[220px_1fr_1fr]">
-        <aside className="order-2 lg:order-1">
+        <aside className="order-2 min-w-0 lg:order-1">
           <StageInspector currentIndex={idx} onJump={jumpTo} />
           <div className="mt-3">
             <PlaybackControls
@@ -80,7 +80,7 @@ export function VisualizeView() {
           </div>
         </aside>
 
-        <div className="order-1 flex flex-col gap-4 lg:order-2">
+        <div className="order-1 flex min-w-0 flex-col gap-4 lg:order-2">
           <HeapVisualizer heap={state.heap} />
           {current ? (
             <StageExplanation
@@ -97,7 +97,7 @@ export function VisualizeView() {
           )}
         </div>
 
-        <div className="order-3 flex min-h-[280px] flex-col gap-4 lg:order-3">
+        <div className="order-3 flex min-h-[280px] min-w-0 flex-col gap-4 lg:order-3">
           <div className="min-h-[220px] flex-1 rounded-lg border border-border bg-panel">
             <Terminal lines={state.term} className="h-full" />
           </div>

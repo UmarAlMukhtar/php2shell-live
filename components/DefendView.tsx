@@ -20,7 +20,7 @@ export function DefendView() {
       </div>
 
       <div className="grid gap-4 lg:grid-cols-[280px_1fr_1fr]">
-        <aside className="flex flex-col gap-4">
+        <aside className="flex min-w-0 flex-col gap-4">
           <section className="rounded-lg border border-border bg-panel p-3">
             <h2 className="mb-2 font-mono text-xs tracking-widest text-muted uppercase">
               Response actions
@@ -49,7 +49,7 @@ export function DefendView() {
           </p>
         </aside>
 
-        <div className="flex flex-col gap-4">
+        <div className="flex min-w-0 flex-col gap-4">
           <HeapVisualizer heap={state.heap} />
           <div className="min-h-[240px] flex-1 rounded-lg border border-border bg-panel">
             <Terminal lines={state.term} className="h-full" />

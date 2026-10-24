@@ -99,7 +99,7 @@ export function Terminal({ lines, className }: Props) {
   return (
     <div
       ref={hostRef}
-      className={className}
+      className={`${className ?? ""} min-w-0 overflow-hidden`}
       role="log"
       aria-label="Simulated terminal output"
       data-testid="terminal"
