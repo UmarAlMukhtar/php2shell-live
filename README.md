@@ -7,6 +7,24 @@ multiplayer planned.
 > All gameplay is a client-side simulation against fictional targets.
 > See `AGENTS.md` for the simulation boundaries and engineering conventions.
 
+## Live demo
+
+https://php2shell-live.vercel.app — first deployment (production domain of
+the hobby project; the repo is git-connected so pushes auto-deploy and PRs
+get preview deployments).
+
+## The game
+
+One continuous journey: **Visualize → Defend → Verify**.
+
+- **Visualize** — auto-played five-stage simulation of CVE-2026-109619
+  (stale global state → use-after-free on a shared php-fpm worker) with a
+  visible heap, xterm.js terminal, security logs, and playback controls.
+- **Defend** — real-time incident response. Actions have prerequisites and
+  costs; only a patched + restarted runtime remediates.
+- **Verify** — replays the modeled attack and reports PATCHED or explains
+  which defense was insufficient.
+
 ## Getting started
 
 ```bash
