@@ -1,4 +1,4 @@
-import { CVE, TARGET_PATCH_VERSION, isVulnerable } from "./cve";
+import { CVE, TARGET_PATCH_VERSION } from "./cve";
 import { isPatchLive, patchStagedButNotLive, pushLogs, pushTerm } from "./engine";
 import { WORKER_ID, log } from "./logs";
 import type { SimState, TermLine, VerifyReport } from "./types";

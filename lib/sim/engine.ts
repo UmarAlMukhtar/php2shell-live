@@ -1,5 +1,5 @@
 import { ATTACKER_IP, AMBIENT_LOGS, HOSTNAME, WORKER_ID, log } from "./logs";
-import { SERVER_PHP_VERSION, TARGET_PATCH_VERSION, isVulnerable } from "./cve";
+import { SERVER_PHP_VERSION, isVulnerable } from "./cve";
 import type {
   AttackerStage,
   DefenderActionId,
