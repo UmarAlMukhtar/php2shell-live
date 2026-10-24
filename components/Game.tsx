@@ -60,10 +60,10 @@ function ForensicsToggle() {
         aria-pressed={fx.enabled}
         aria-expanded={fx.enabled}
         aria-controls="forensics-panel"
-        className={`rounded border px-3 py-1.5 font-mono text-[10px] font-bold tracking-widest uppercase transition-colors ${
+        className={`rounded-full border px-3 py-1.5 text-[11px] font-semibold tracking-wide uppercase transition-colors ${
           fx.enabled
-            ? "border-cyan/60 bg-cyan/15 text-cyan"
-            : "border-cyan/30 bg-cyan/5 text-cyan/70 hover:bg-cyan/10"
+            ? "border-accent/60 bg-accent/15 text-accent"
+            : "border-border bg-surface-2 text-fg-muted hover:text-fg"
         }`}
       >
         ◎ forensics
@@ -71,7 +71,7 @@ function ForensicsToggle() {
       {showHint ? (
         <span
           role="status"
-          className="glass absolute top-full right-0 z-20 mt-2 flex w-56 items-start gap-2 p-2 font-mono text-[10px] leading-4 normal-case tracking-normal text-cyan"
+          className="absolute top-full right-0 z-20 mt-2 flex w-56 items-start gap-2 rounded-lg border border-border bg-surface-2 p-2 text-[11px] leading-4 normal-case tracking-normal text-fg"
         >
           <span className="flex-1">
             New: <strong>FORENSICS</strong> — inspect every allocation, replay the
@@ -81,7 +81,7 @@ function ForensicsToggle() {
             type="button"
             onClick={dismiss}
             aria-label="Dismiss forensics hint"
-            className="text-muted hover:text-foreground"
+            className="text-fg-faint hover:text-fg"
           >
             ✕
           </button>
@@ -103,7 +103,7 @@ function IntroCard() {
   return (
     <aside
       aria-label="What you are about to see"
-      className="glass border-cyan/30 p-3 font-mono text-[11px] leading-5 text-foreground/80"
+      className="rounded-lg border border-border bg-surface-2 p-3 text-[13px] leading-5 text-fg-muted"
     >
       <button
         type="button"
@@ -112,11 +112,11 @@ function IntroCard() {
           force();
         }}
         aria-label="Dismiss introduction"
-        className="float-right text-muted hover:text-foreground"
+        className="float-right text-fg-faint hover:text-fg"
       >
         ✕
       </button>
-      <span className="text-cyan">CVE-2026-109619 in one line:</span> a PHP
+      <span className="text-accent">CVE-2026-109619 in one line:</span> a PHP
       worker&rsquo;s global-state pointer survives an aborted request and keeps
       aiming at freed heap — the next request re-issues that slot, and the
       stale pointer now reads attacker-influenced memory. Watch it happen
@@ -137,18 +137,17 @@ function GameInner() {
   const breaching = state.status === "BREACHED" && state.phase !== "report";
 
   return (
-    <div className="cyber-bg scanlines mx-auto flex min-h-screen max-w-[1400px] flex-col gap-4 p-4 font-mono md:p-6">
+    <div className="mx-auto flex min-h-screen max-w-[1400px] flex-col gap-4 p-4 md:p-6">
       <BreachEffect active={breaching} />
 
-      <header className="flex flex-wrap items-center justify-between gap-3 border-b border-cyan/20 pb-3">
+      <header className="-mx-4 flex flex-wrap items-center justify-between gap-3 border-b border-border bg-surface-1 px-4 py-3 md:-mx-6 md:px-6">
         <div>
-          <p className="text-[10px] tracking-[0.3em] text-muted uppercase">
+          <p className="text-[10px] tracking-[0.3em] text-fg-faint uppercase">
             simulated training environment — fictional targets only
           </p>
-          <h1 className="text-xl font-bold tracking-wider text-foreground">
-            <span className="holo-title">PHP2Shell</span>
-            <span className="text-danger">:</span> Live
-            <span className="ml-3 align-middle font-mono text-[10px] font-normal text-muted">
+          <h1 className="text-xl font-semibold tracking-wide text-fg">
+            PHP2Shell<span className="text-accent">:</span> Live
+            <span className="ml-3 align-middle font-mono text-[11px] font-normal text-fg-faint">
               {CVE.id}
             </span>
           </h1>
@@ -157,7 +156,7 @@ function GameInner() {
           <ForensicsToggle />
           <Link
             href="/play"
-            className="rounded border border-danger/40 bg-danger/10 px-3 py-1.5 font-mono text-[10px] font-bold tracking-widest text-danger uppercase hover:bg-danger/20"
+            className="rounded-full border border-border bg-surface-2 px-3 py-1.5 text-[11px] font-semibold tracking-wide text-fg-muted uppercase hover:border-accent/50 hover:text-accent"
           >
             multiplayer →
           </Link>
@@ -174,12 +173,12 @@ function GameInner() {
           {PHASES.map((p, i) => (
             <span
               key={p}
-              className={`font-mono text-xs tracking-widest ${
+              className={`text-xs font-semibold tracking-widest ${
                 i === current
-                  ? "font-bold text-accent"
+                  ? "text-accent"
                   : i < current
-                    ? "text-foreground/60"
-                    : "text-muted/60"
+                    ? "text-fg-muted"
+                    : "text-fg-faint"
               }`}
               aria-current={i === current ? "step" : undefined}
             >
@@ -202,7 +201,7 @@ function GameInner() {
         <ForensicsDrawer />
       </main>
 
-      <footer className="border-t border-border pt-3 text-center font-mono text-[10px] text-muted">
+      <footer className="border-t border-border pt-3 text-center text-[11px] text-fg-faint">
         Educational simulation of {CVE.id} (stale global state → use-after-free).
         All systems, hosts, IPs and commands are fictional. No real code is executed.
       </footer>
