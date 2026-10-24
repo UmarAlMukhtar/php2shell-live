@@ -9,6 +9,9 @@ import {
 import { getRoomStore, setRoomStore, type RoomStore } from "@/lib/mp/store";
 import type { Room } from "@/lib/mp/protocol";
 
+/** Stay under the 150 ms per-player action floor between moves. */
+const pace = () => new Promise((r) => setTimeout(r, 160));
+
 class MemStore implements RoomStore {
   rooms = new Map<string, Room>();
   async get(code: string) {
@@ -132,6 +135,7 @@ describe("rooms", () => {
         id,
       });
       expect(r.ok).toBe(true);
+      await pace();
     }
     const v = await applyRoomAction(store, room.code, def.id, def.token, {
       kind: "verify",
@@ -146,12 +150,14 @@ describe("rooms", () => {
     const room = await createRoom(store);
     const { def, atk } = await joinTwo(room.code);
     await applyRoomAction(store, room.code, atk.id, atk.token, { kind: "attack", id: "probe" });
+    await pace();
     for (const id of ["inspect_logs", "investigate_version", "apply_patch", "restart_services"] as const) {
       const r = await applyRoomAction(store, room.code, def.id, def.token, {
         kind: "defend",
         id,
       });
       expect(r.ok).toBe(true);
+      await pace();
     }
     // attacker aggression now deflects
     const t = await applyRoomAction(store, room.code, atk.id, atk.token, {
@@ -159,6 +165,7 @@ describe("rooms", () => {
       id: "trigger",
     });
     expect(t.ok).toBe(true);
+    await pace();
     const v = await applyRoomAction(store, room.code, def.id, def.token, { kind: "verify" });
     expect(v.ok).toBe(true);
     const after = await store.get(room.code);
@@ -224,6 +231,13 @@ describe("rooms", () => {
     });
     expect(r2.ok).toBe(false);
     expect(r2.error).toBe("too_fast");
+    // …and clears once the floor window passes.
+    await pace();
+    const r3 = await applyRoomAction(store, room.code, def.id, def.token, {
+      kind: "defend",
+      id: "investigate_version",
+    });
+    expect(r3.ok).toBe(true);
   });
 
   it("prunes ghost players so a room can't wedge full", async () => {
@@ -247,6 +261,6 @@ describe("rooms", () => {
     const room = await createRoom(store);
     const j = await joinRoom(store, room.code, "a\u0000b\nlong-call-sign-xxxxxxxx", "spectator");
     if ("error" in j) throw new Error("join failed");
-    expect(j.player.name).toBe("ablong-call-sign-xxxxx");
+    expect(j.player.name).toBe("ablong-call-sign-xxxxxxx");
   });
 });
