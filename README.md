@@ -1,8 +1,8 @@
 # PHP2Shell: Live
 
 Cybersecurity education through simulated incident-response gameplay.
-Next.js 16 · TypeScript · Tailwind CSS 4 · Motion · xterm.js — Socket.IO
-multiplayer planned.
+Next.js 16 · TypeScript · Tailwind CSS 4 · Motion · xterm.js — real-time
+attacker-vs-defender multiplayer over WebSockets + Upstash Redis.
 
 > All gameplay is a client-side simulation against fictional targets.
 > See `AGENTS.md` for the simulation boundaries and engineering conventions.
@@ -42,6 +42,24 @@ Real-time attacker-vs-defender rooms on top of the same simulation engine:
   Vercel (`KV_REST_API_URL`/`KV_REST_API_TOKEN`, injected by the Upstash
   integration), so players on different function instances stay in sync.
 
+### Hardening (what the server enforces)
+
+- **Authz** — every mutation requires the room's `playerId` + server-issued
+  bearer `token`; role gates reject cross-role actions.
+- **Validation** — action payloads are whitelist-checked (`defend`/`attack`
+  ids, `verify`, `reset`); unknown payloads are rejected before state
+  changes. Call signs are control-char-stripped and capped at 24 chars.
+- **Rate limits** — room creation is capped at 20/hour per client IP;
+  per-player actions have a 150 ms floor; both via a fixed-window limiter
+  that uses Redis when present, memory locally.
+- **Isolation** — all state is keyed by room code (`p2s:room:<CODE>`); one
+  room's players/actions/snapshots never touch another's.
+- **Freshness** — every room API response is `Cache-Control: no-store`;
+  sockets live up to `maxDuration = 300`; presence is heartbeat-derived
+  (~9 s) and ghosts older than 2 min are pruned on join.
+- **Redis consumption** — CAS writes only on mutation; polls read one key;
+  heartbeats piggyback on ~5 s touches; rooms expire after 60 min idle.
+
 ## Getting started
 
 ```bash
@@ -58,6 +76,19 @@ npm run lint && npm run typecheck && npm test && npm run build
 
 CI (`.github/workflows/ci.yml`) runs the same gates on every push and PR.
 
+## Limitations & security boundaries
+
+- **Simulation only** — no real exploit, no shells, no live targets. Heap,
+  terminal, and logs are deterministic renderings of CVE-2026-109619, not
+  attack tooling.
+- **Transport** — WebSockets work only in the Vercel runtime; local dev and
+  `next start` automatically use the polling fallback.
+- **Scale** — rooms hold ≤8 players, TTL 60 min; a demo tool, not a
+  production matchmaking service. Identity is sessionStorage + a room
+  token (no accounts).
+- **Persistence** — room state is ephemeral (Redis key TTL); nothing is
+  logged to a durable database.
+
 ## Docs
 
 - `AGENTS.md` — architecture, TypeScript standards, component and testing
@@ -66,3 +97,4 @@ CI (`.github/workflows/ci.yml`) runs the same gates on every push and PR.
   integrations, deploy readiness.
 - `.devin/skills/` — project skills for Devin sessions (frontend-design,
   security-simulation, browser-qa, deployment-check).
+- `docs/JUDGE_DEMO.md` — 90-second judge-demo script + submission text.
